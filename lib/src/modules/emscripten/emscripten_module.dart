@@ -148,9 +148,6 @@ class EmscriptenModule extends Module {
               } else if (description.name == 'free') {
                 free = description.function as _Free;
               }
-            } else {
-              throw new StateError(
-                  'Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
             }
           } else {
             throw new StateError(

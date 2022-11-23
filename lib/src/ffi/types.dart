@@ -165,6 +165,14 @@ class Opaque extends NativeType {}
 @unsized
 class Void extends NativeType {}
 
+/// Represents a char type in C
+///
+/// Char is not constructible in the Dart code and serves
+/// purely as a marker in type signatures
+@sealed
+@notConstructible
+class Char extends Int8 {}
+
 /// Represents a pointer into the native C memory. Cannot be extended.
 @sealed
 class Pointer<T extends NativeType> extends NativeType {

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
+import '../ffi/utf8.dart';
 import 'module.dart';
 import '../ffi/types.dart';
 import '../internal/marshaller.dart';
@@ -45,6 +46,8 @@ class Memory implements Allocator {
     _registerType<Uint32>(4);
     _registerType<Int64>(8);
     _registerType<Uint64>(8);
+    _registerType<Utf8>(1);
+    _registerType<Char>(1);
     _registerType<IntPtr>(pointerSizeBytes);
     _registerType<Opaque>(pointerSizeBytes);
     registerNativeMarshallerType<Void>();
