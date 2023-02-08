@@ -1,3 +1,6 @@
+## [0.9.1]
+* Rebranded as wasm_ffi. Merged changes for Char & Utf8 support and fixed a memory bug.
+
 ## [0.7.4]
 * UTF8 extension and `Char` type.
 

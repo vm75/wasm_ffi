@@ -204,15 +204,12 @@ class Pointer<T extends NativeType> extends NativeType {
   /// The optional parameter `bindTo` can be ommited, if and only if
   /// [Memory.global] is set, which is then used as `Memory` to bind to.
   factory Pointer.fromAddress(int ptr, [Memory? bindTo]) {
-    bindTo = Memory.global;
-    Memory m;
-    if (bindTo != null) {
-      m = bindTo;
-    } else {
+    Memory? memory = bindTo ?? Memory.global;
+    if (memory == null) {
       throw new StateError(
           'No global memory set and no explcity memory to bind to given!');
     }
-    return new Pointer._(ptr, m, _isUnsizedType<T>() ? null : sizeOf<T>());
+    return new Pointer._(ptr, memory, _isUnsizedType<T>() ? null : sizeOf<T>());
   }
 
   Pointer._(this.address, this.boundMemory, this.size);
