@@ -26,7 +26,7 @@ There are some rules and things to notice when working with functions:
     * You may nest the pointer type up to two times but not more:
         * e.g. `Pointer<Int32>` and `Pointer<Pointer<Int32>>` are allowed but `Pointer<Pointer<Pointer<Int32>>>` is not.
     * If the return type is `Pointer<NativeFunction>` you MUST use `Pointer<NativeFunction<dynamic>>`, everything else will fail. You can restore the type arguments afterwards yourself using casting. On the other hand, as stated above, type arguments for `NativeFunction`s are just ignored anyway.
-    * To concretize the things above, [return_types.md](https://github.com/vm75/wasm_ffi/tree/master/return_types.md) lists what may be used as return type, everyhing else will cause a runtime error.
+    * To concretize the things above, [return_types.md](https://github.com/vm75/wasm_ffi/tree/main/return_types.md) lists what may be used as return type, everyhing else will cause a runtime error.
     * WORKAROUND: If you need something else (e.g. `Pointer<Pointer<Pointer<Double>>>`), use `Pointer<IntPtr>` and cast it yourselfe afterwards using [`Pointer.cast()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/cast.html).
 
 ## Memory

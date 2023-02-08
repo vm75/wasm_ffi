@@ -1,3 +1,6 @@
+## [0.9.3]
+* Fixed github links
+
 ## [0.9.2]
 * Fix plugin platform and example
 

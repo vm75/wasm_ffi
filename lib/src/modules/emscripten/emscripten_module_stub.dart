@@ -16,7 +16,7 @@ import '../../../wasm_ffi_meta.dart';
 /// dart, so using `-s MAIN_MODULE=1` might be advisable.
 ///
 /// For a detailed walkthrough on how to create and inject these files,
-/// see the [example](https://github.com/vm75/wasm_ffi/blob/master/example/README.md).
+/// see the [example](https://github.com/vm75/wasm_ffi/blob/main/example/README.md).
 ///
 /// On platforms where [dart:js](https://api.dart.dev/stable/dart-js/dart-js-library.html)
 /// is not available, all methods throw [UnsupportedError]s.
