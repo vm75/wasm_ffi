@@ -4,3 +4,4 @@ library web_ffi;
 
 export 'src/ffi/types.dart';
 export 'src/ffi/extensions.dart';
+export 'src/ffi/utf8.dart';
