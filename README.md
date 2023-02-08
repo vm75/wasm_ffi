@@ -5,7 +5,7 @@ The general idea is to expose an API that is compatible with `dart:ffi` but tran
 
 Currently, only `WebAssembly` compiled with [emscripten](https://emscripten.org/) is usable because emscripten also generates the JavaScript imports `WebAssembly` needs.
 
-For a tutorial how to use this package (including the compiler settings for emscripten) see the [README_example](./README_example.md), but make sure to read this README first!
+For a tutorial how to use this package (including the compiler settings for emscripten) see the [example/README](./example/README.md), but make sure to read this README first!
 
 ## Differences to dart:ffi
 While `wasm_ffi` tries to mimic the `dart:ffi` API as close as possible, there are some differences. The list below documents the most importent ones, make sure to read it. For more insight, take a look at the API documentation.

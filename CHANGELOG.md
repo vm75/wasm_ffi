@@ -1,3 +1,6 @@
+## [0.9.2]
+* Fix plugin platform and example
+
 ## [0.9.1]
 * Rebranded as wasm_ffi. Merged changes for Char & Utf8 support and fixed a memory bug.
 

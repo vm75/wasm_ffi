@@ -1,8 +1,8 @@
 # How to use `wasm_ffi`
 
-*NOTE*: In steps 4.2, 5 and 6 this tutorial does slightly different things for flutter and no-flutter. For the flutter files see [example_flutter](./example_flutter), for the no-flutter files see [example_no_flutter](./example_no_flutter). This tutorial assumes that your workdir is one of these two folders.
+*NOTE*: In steps 4.2, 5 and 6 this tutorial does slightly different things for flutter and no-flutter. For the flutter files see [example_flutter](../example_flutter), for the no-flutter files see [example_no_flutter](../example_no_flutter). This tutorial assumes that your workdir is one of these two folders.
 
-This tutorial assumes you have read [`wasm_ffi`'s README](README.md).
+This tutorial assumes you have read [`wasm_ffi`'s README](../README.md).
 We will walk through a simple example how we ported [opus_dart](https://github.com/EPNW/opus_dart) to the web.
 
 ## 1. Write a proxy_fii
