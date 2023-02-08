@@ -5,21 +5,41 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "sweph-example",
-            "cwd": "example",
+            "name": "example_flutter",
+            "cwd": "example_flutter",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "sweph-example (profile mode)",
-            "cwd": "example",
+            "name": "example_flutter (profile mode)",
+            "cwd": "example_flutter",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "sweph-example (release mode)",
-            "cwd": "example",
+            "name": "example_flutter (release mode)",
+            "cwd": "example_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "example_no_flutter",
+            "cwd": "example_no_flutter",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "example_no_flutter (profile mode)",
+            "cwd": "example_no_flutter",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "example_no_flutter (release mode)",
+            "cwd": "example_no_flutter",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

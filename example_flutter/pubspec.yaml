@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   inject_js: ^2.0.0
   wasm_ffi:
-    path: ../..
+    path: ..
 
 flutter:
   assets:

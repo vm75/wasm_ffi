@@ -1,11 +1,11 @@
 # wasm_ffi
-`wasm_ffi` is a drop-in solution for using `dart:ffi` on the web. This enables you to work with `WebAssembly` more easily and convenient.
+`wasm_ffi` is a drop-in solution for using `dart:ffi` on the web. This enables you to work with `WebAssembly` more easily and convenient. It is just a rebrand of [web_ffi](https://pub.dev/packages/web_ffi) which is not being maintained.
 
 The general idea is to expose an API that is compatible with `dart:ffi` but translates all calls through `dart:js` to a browser running `WebAssembly`.
 
-Currently, only `WebAssembly` compiled with [emscripten](https://emscripten.org/) is usable because emscripten also generates the JavaScript imports `WebAssembly` needs. Open a issue on [GitHub](https://github.com/vm75/wasm_ffi/) if you think we should support other platforms/compilers, too.
+Currently, only `WebAssembly` compiled with [emscripten](https://emscripten.org/) is usable because emscripten also generates the JavaScript imports `WebAssembly` needs.
 
-For a tutorial how to use this package (including the compiler settings for emscripten) see the [example/README](./example/README.md), but make sure to read this README first!
+For a tutorial how to use this package (including the compiler settings for emscripten) see the [README_example](./README_example.md), but make sure to read this README first!
 
 ## Differences to dart:ffi
 While `wasm_ffi` tries to mimic the `dart:ffi` API as close as possible, there are some differences. The list below documents the most importent ones, make sure to read it. For more insight, take a look at the API documentation.

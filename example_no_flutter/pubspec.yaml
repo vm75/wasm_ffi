@@ -8,4 +8,4 @@ environment:
 
 dependencies:
   wasm_ffi:
-    path: ../..
+    path: ..
