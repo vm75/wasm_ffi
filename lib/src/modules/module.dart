@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
-import '../../web_ffi_meta.dart';
+import '../../wasm_ffi_meta.dart';
 
 /// Base class to interact with the WebAssembly.
 ///

@@ -1,6 +1,6 @@
-/// Provides additional classes that are needed for web_ffi,
+/// Provides additional classes that are needed for wasm_ffi,
 /// but are not present in [dart:ffi](https://api.dart.dev/stable/2.12.0/dart-ffi/dart-ffi-library.html).
-library web_ffi_modules;
+library wasm_ffi_modules;
 
 export 'src/modules/exceptions.dart';
 export 'src/modules/module.dart';

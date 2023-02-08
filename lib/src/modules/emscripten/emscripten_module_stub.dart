@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import '../module.dart';
 
-import '../../../web_ffi_meta.dart';
+import '../../../wasm_ffi_meta.dart';
 
 /// Provides access to WebAssembly compiled with [emscripten](https://emscripten.org).
 ///
@@ -16,7 +16,7 @@ import '../../../web_ffi_meta.dart';
 /// dart, so using `-s MAIN_MODULE=1` might be advisable.
 ///
 /// For a detailed walkthrough on how to create and inject these files,
-/// see the [example](https://github.com/EPNW/web_ffi/blob/master/example/README.md).
+/// see the [example](https://github.com/EPNW/wasm_ffi/blob/master/example/README.md).
 ///
 /// On platforms where [dart:js](https://api.dart.dev/stable/dart-js/dart-js-library.html)
 /// is not available, all methods throw [UnsupportedError]s.

@@ -4244,7 +4244,7 @@
   },
   T = {
     _adu: function(original, tried) {
-      return "CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at https://github.com/EPNW/web_ffi" + ("\r\nOriginal: " + H.S(original)) + ("\r\nTried: " + tried.toString$0(0));
+      return "CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at https://github.com/EPNW/wasm_ffi" + ("\r\nOriginal: " + H.S(original)) + ("\r\nTried: " + tried.toString$0(0));
     },
     _fromWasmFunction: function($name, func) {
       var index, $length,

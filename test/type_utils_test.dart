@@ -1,5 +1,5 @@
 import '../lib/src/internal/type_utils.dart';
-import '../lib/web_ffi.dart';
+import '../lib/wasm_ffi.dart';
 
 void main() {
   print(pointerPointerPointerPrefix);

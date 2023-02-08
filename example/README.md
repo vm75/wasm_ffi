@@ -1,15 +1,15 @@
-# How to use `web_ffi`
+# How to use `wasm_ffi`
 
 *NOTE*: In steps 4.2, 5 and 6 this tutorial does slightly different things for flutter and no-flutter. For the flutter files see [example_flutter](./example_flutter), for the no-flutter files see [example_no_flutter](./example_no_flutter). This tutorial assumes that your workdir is one of these two folders.
 
-This tutorial assumes you have read [`web_ffi`'s README](../README.md).
+This tutorial assumes you have read [`wasm_ffi`'s README](../README.md).
 We will walk through a simple example how we ported [opus_dart](https://github.com/EPNW/opus_dart) to the web.
 
 ## 1. Write a proxy_fii
-The proxy_ffi is a simple dart file inside your project. It will conditionally import `web_ffi` or `dart:ffi` based on your platform and export it agian. We will later extend this proxy.
+The proxy_ffi is a simple dart file inside your project. It will conditionally import `wasm_ffi` or `dart:ffi` based on your platform and export it agian. We will later extend this proxy.
 Create `lib/src/proxy_ffi.dart`:
 ```dart
-export 'package:web_ffi/web_ffi.dart' if (dart.library.ffi) 'dart:ffi';
+export 'package:wasm_ffi/wasm_ffi.dart' if (dart.library.ffi) 'dart:ffi';
 ```
 
 ## 2. Write normal binding code
@@ -83,7 +83,7 @@ WORKDIR ./emc_out
 After this we have successfully compiled the opus c library and obtained `libopus.js` and `libopus.wasm`.
 
 ## 4. Initalize everything
-So now it's time to inizalize everything. Our goal is to obtain a [`DynamicLibrary`](https://pub.dev/documentation/web_ffi/latest/web_ffi/DynamicLibrary-class.html). Since that API for that is different for `dart:ffi` and `web_ffi` we need to write two files which will be conditionally imported.
+So now it's time to inizalize everything. Our goal is to obtain a [`DynamicLibrary`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary-class.html). Since that API for that is different for `dart:ffi` and `wasm_ffi` we need to write two files which will be conditionally imported.
 
 ### 4.1 For non-web platforms
 This is the conventinal part. Create `lib/src/init_ffi.dart`:
@@ -105,13 +105,13 @@ DynamicLibrary openOpus() {
 ```
 
 ### 4.2 For web platforms
-Before we can go on actually initalize our [`Module`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/Module-class.html) in dart, we need to include `libopus.wasm` and `libopus.js` in our project. There are several ways to do that. First we will discuss the theoretical background. Than you can decide if you want to follow our sample to include the files or know a way that is more suited for your project.
-`web_ffi` will bind against your web runtime, access the global JavaScript object and expect to find a property named `libopus`, which holds a function (the so called `module-function`) that takes one argument (we will refer to this argument as `arg0`). Usually, all this is already written in `libopus.js`, so we need to include that file. If the `module-function` is later called from inside dart, it will try to instantiate the actuall WebAssembly instance. Since we compiled with emscripten, the `module-function` follows the standard emscripten approaches to try to get `libopus.wasm`. This means it will firstly check if `arg0['wasmBinary']` contains the bytes of `libopus.wasm`, and if so, use them. If not it will try to access `libopus.wasm` via http(s) from the same site `libopus.js` is included in.
+Before we can go on actually initalize our [`Module`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Module-class.html) in dart, we need to include `libopus.wasm` and `libopus.js` in our project. There are several ways to do that. First we will discuss the theoretical background. Than you can decide if you want to follow our sample to include the files or know a way that is more suited for your project.
+`wasm_ffi` will bind against your web runtime, access the global JavaScript object and expect to find a property named `libopus`, which holds a function (the so called `module-function`) that takes one argument (we will refer to this argument as `arg0`). Usually, all this is already written in `libopus.js`, so we need to include that file. If the `module-function` is later called from inside dart, it will try to instantiate the actuall WebAssembly instance. Since we compiled with emscripten, the `module-function` follows the standard emscripten approaches to try to get `libopus.wasm`. This means it will firstly check if `arg0['wasmBinary']` contains the bytes of `libopus.wasm`, and if so, use them. If not it will try to access `libopus.wasm` via http(s) from the same site `libopus.js` is included in.
 
 #### 4.2.1 With flutter
-We don't want to alter the files flutter puts out after building, so we will include everyhing we need into the flutter app. For `libopus.js` and `libopus.wasm`, we include them as flutter assets, to later inject the JavaScript from the assets into the runtime, we use the [inject_js](https://pub.dev/packages/inject_js) plugin. Lastly, we will use the [`EmscriptenModule.compile()`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/EmscriptenModule/compile.html) function with bytes also loaded from the assets to use the `arg0['wasmBinary']` approach. So we need to update our `pubspec.yaml`:
+We don't want to alter the files flutter puts out after building, so we will include everyhing we need into the flutter app. For `libopus.js` and `libopus.wasm`, we include them as flutter assets, to later inject the JavaScript from the assets into the runtime, we use the [inject_js](https://pub.dev/packages/inject_js) plugin. Lastly, we will use the [`EmscriptenModule.compile()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/EmscriptenModule/compile.html) function with bytes also loaded from the assets to use the `arg0['wasmBinary']` approach. So we need to update our `pubspec.yaml`:
 ```yaml
-name: web_ffi_example_flutter
+name: wasm_ffi_example_flutter
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -123,7 +123,7 @@ dependencies:
   flutter:
     sdk: flutter
   inject_js: ^2.0.0
-  web_ffi:
+  wasm_ffi:
     path: ../..
 
 flutter:
@@ -136,10 +136,10 @@ After running `flutter packages get` we can write our init file at `lib/src/init
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:inject_js/inject_js.dart' as Js;
-// Notice that in this file, we import web_ffi and not proxy_ffi.dart
-import 'package:web_ffi/web_ffi.dart';
+// Notice that in this file, we import wasm_ffi and not proxy_ffi.dart
+import 'package:wasm_ffi/wasm_ffi.dart';
 // and additionally
-import 'package:web_ffi/web_ffi_modules.dart';
+import 'package:wasm_ffi/wasm_ffi_modules.dart';
 
 // Note that if you use assets included in a package rather them the main app,
 // the _basePath would be different: 'packages/<package_name>/assets'
@@ -186,7 +186,7 @@ Usually, if we are not using flutter we use `dart2js` what will output a JavaScr
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>web_ffi Test Page</title>
+        <title>wasm_ffi Test Page</title>
         <script defer src="main.dart.js"></script>
         <script src="libopus.js"></script>
     </head>
@@ -194,13 +194,13 @@ Usually, if we are not using flutter we use `dart2js` what will output a JavaScr
     </body>
 </html>
 ```
-Then we will use the [`EmscriptenModule.process()`](https://pub.dev/documentation/web_ffi/latest/web_ffi_modules/EmscriptenModule/process.html) function which will internally open the `module-function` with an `arg` without `wasmBinary` set, so the emscripten logic will fetch `libopus.wasm` automatically.
+Then we will use the [`EmscriptenModule.process()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/EmscriptenModule/process.html) function which will internally open the `module-function` with an `arg` without `wasmBinary` set, so the emscripten logic will fetch `libopus.wasm` automatically.
 Here is our `lib/src/init_web.dart`:
 ```dart
-// Notice that in this file, we import web_ffi and not proxy_ffi.dart
-import 'package:web_ffi/web_ffi.dart';
+// Notice that in this file, we import wasm_ffi and not proxy_ffi.dart
+import 'package:wasm_ffi/wasm_ffi.dart';
 // and additionally
-import 'package:web_ffi/web_ffi_modules.dart';
+import 'package:wasm_ffi/wasm_ffi_modules.dart';
 
 Module? _module;
 
@@ -232,12 +232,12 @@ DynamicLibrary openOpus() {
 ### 4.3 Update the proxy
 We now update the proxy to also export the correct init file. Change `lib/src/proxy_ffi.dart` to look like:
 ```dart
-export 'package:web_ffi/web_ffi.dart' if (dart.library.ffi) 'dart:ffi';
+export 'package:wasm_ffi/wasm_ffi.dart' if (dart.library.ffi) 'dart:ffi';
 export 'init_web.dart' if (dart.library.ffi) 'init_ffi.dart';
 ```
 
 ## 5. Write your Apps code
-Now we write our app code. The general scheme is to import `proxy_ffi.dart`, and await it's `initFfi()`. Then we can get a `DynamicLibrary` using `openOpus()` and instantiate our binding code with this `DynamicLibrary`. Finally we use our binding code to call the WebAssembly. Again, the code for flutter and no-flutter is slightly different here. 
+Now we write our app code. The general scheme is to import `proxy_ffi.dart`, and await it's `initFfi()`. Then we can get a `DynamicLibrary` using `openOpus()` and instantiate our binding code with this `DynamicLibrary`. Finally we use our binding code to call the WebAssembly. Again, the code for flutter and no-flutter is slightly different here.
 
 ### 5.0 EXCURSE: String from C Pointer
 A string in c is usually represented as a sqeuence of bytes and terminated with a 0 byte. The function we are about to call gives us a pointer to the first element in that sequence. To convert it to something usable in dart we will take that pointer, find the strings length by searching the next 0 byte, and use `dart:convert` to convert it to dart.
@@ -288,10 +288,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'web_ffi Demo',
+      title: 'wasm_ffi Demo',
       home: Scaffold(
           appBar: AppBar(
-            title: Text('web_ffi Demo'),
+            title: Text('wasm_ffi Demo'),
             centerTitle: true,
           ),
           body: Container(
@@ -314,7 +314,7 @@ export 'src/c_strings.dart';
 ```
 If we do not use flutter, our main file is `bin/main.dart`, and should look like this:
 ```dart
-import 'package:web_ffi_example_no_flutter/example_no_flutter.dart';
+import 'package:wasm_ffi_example_no_flutter/example_no_flutter.dart';
 
 Future<void> main() async {
   await initFfi();
@@ -339,9 +339,9 @@ There we should see a text field reading `libopus 1.3.1`.
 ### 6.2 Without flutter
 We already setup most files we need in section 4.2.2. The only thing missing is `main.dart.js`, so lets use `dart2js` to create it:
 ```shell
-dart2js ./bin/main.dart -o ./web/main.dart.js 
+dart2js ./bin/main.dart -o ./web/main.dart.js
 ```
-Next, we need to serve the web directory over http. For that we use [dhttpd](https://pub.dev/packages/dhttpd), a simple in dart written webserver. To install it use 
+Next, we need to serve the web directory over http. For that we use [dhttpd](https://pub.dev/packages/dhttpd), a simple in dart written webserver. To install it use
 ```shell
 pub global activate dhttpd
 ```

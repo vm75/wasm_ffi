@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 import '../module.dart';
-import '../../../web_ffi_meta.dart';
+import '../../../wasm_ffi_meta.dart';
 
 @JS('globalThis')
 external Object get _globalThis;
@@ -24,7 +24,7 @@ class _EmscriptenModuleJs {
   external factory _EmscriptenModuleJs({Uint8List wasmBinary});
 }
 
-const String _github = r'https://github.com/EPNW/web_ffi';
+const String _github = r'https://github.com/EPNW/wasm_ffi';
 String _adu(WasmSymbol? original, WasmSymbol? tried) =>
     'CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at $_github' +
     '\r\nOriginal: $original' +

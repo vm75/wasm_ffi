@@ -5,7 +5,7 @@ import 'module.dart';
 import '../ffi/utf8.dart';
 import '../ffi/types.dart';
 import '../internal/marshaller.dart';
-import '../../web_ffi_meta.dart';
+import '../../wasm_ffi_meta.dart';
 
 final Map<Type, int> sizeMap = {};
 
@@ -30,7 +30,7 @@ class Memory implements Allocator {
   /// The WebAssembly speficiation defines little endianess, so this is a constant.
   static const Endian endianess = Endian.little;
 
-  /// Must be called before working with `web_ffi` to initalize all type sizes.
+  /// Must be called before working with `wasm_ffi` to initalize all type sizes.
   ///
   /// The optional parameter [pointerSizeBytes] can be used to adjust the size
   /// of pointers. It defaults to `4` since WebAssembly usually uses 32 bit pointers.

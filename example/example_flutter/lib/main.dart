@@ -20,10 +20,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'web_ffi Demo',
+      title: 'wasm_ffi Demo',
       home: Scaffold(
           appBar: AppBar(
-            title: Text('web_ffi Demo'),
+            title: Text('wasm_ffi Demo'),
             centerTitle: true,
           ),
           body: Container(

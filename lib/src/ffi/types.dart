@@ -7,7 +7,7 @@ import '../modules/null_memory.dart';
 
 import '../internal/type_utils.dart';
 
-import '../../web_ffi_meta.dart';
+import '../../wasm_ffi_meta.dart';
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
 /// e.g. a pointer with address 0.

@@ -1,4 +1,4 @@
-import 'package:web_ffi_example_no_flutter/example_no_flutter.dart';
+import 'package:wasm_ffi_example_no_flutter/example_no_flutter.dart';
 
 Future<void> main() async {
   await initFfi();

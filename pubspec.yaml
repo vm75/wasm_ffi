@@ -1,7 +1,7 @@
-name: web_ffi
+name: wasm_ffi
 version: 0.7.4
 
-repository: https://github.com/EPNW/web_ffi/
+repository: https://github.com/EPNW/wasm_ffi/
 description: Translates dart:ffi calls on the web to WebAssembly using dart:js
 
 environment:

@@ -5,7 +5,7 @@ import '../modules/memory.dart';
 import '../modules/module.dart';
 import '../internal/marshaller.dart';
 
-import '../../web_ffi_meta.dart';
+import '../../wasm_ffi_meta.dart';
 
 /// Extension on [Pointer] specialized for the type argument [NativeFunction].
 extension NativeFunctionPointer<NF extends Function>
@@ -13,7 +13,7 @@ extension NativeFunctionPointer<NF extends Function>
   /// Convert to Dart function, automatically marshalling the arguments and return value.
   ///
   /// There are several rules that apply for the return type of `DF`, see
-  /// the list of [allowed return types](https://github.com/EPNW/web_ffi/blob/master/return_types.md).
+  /// the list of [allowed return types](https://github.com/EPNW/wasm_ffi/blob/master/return_types.md).
   /// If marshalling failes, a [MarshallingException] is thrown.
   ///
   /// If this is called on a pointer that does not point to a function,
