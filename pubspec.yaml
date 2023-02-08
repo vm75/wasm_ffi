@@ -1,8 +1,7 @@
 name: wasm_ffi
+description: dart:ffi-like wrapper for wasm
 version: 0.9.1
-
 repository: https://github.com/vm75/wasm_ffi/
-description: Translates dart:ffi calls on the web to WebAssembly using dart:js
 
 environment:
   sdk: ">=2.12.0 <3.0.0"

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:inject_js/inject_js.dart' as Js;
 // Notice that in this file, we import wasm_ffi and not proxy_ffi.dart
