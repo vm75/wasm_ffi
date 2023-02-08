@@ -75,16 +75,16 @@ class Memory implements Allocator {
   final Map<int, WasmSymbol> _symbolsByAddress;
 
   Memory._(this._module)
-      : _symbolsByAddress = new Map<int, WasmSymbol>.fromEntries(_module.exports
+      : _symbolsByAddress = Map<int, WasmSymbol>.fromEntries(_module.exports
             .map<MapEntry<int, WasmSymbol>>((WasmSymbol symbol) =>
-                new MapEntry<int, WasmSymbol>(symbol.address, symbol))),
-        _symbolsByName = new Map<String, WasmSymbol>.fromEntries(_module.exports
+                MapEntry<int, WasmSymbol>(symbol.address, symbol))),
+        _symbolsByName = Map<String, WasmSymbol>.fromEntries(_module.exports
             .map<MapEntry<String, WasmSymbol>>((WasmSymbol symbol) =>
-                new MapEntry<String, WasmSymbol>(symbol.name, symbol)));
+                MapEntry<String, WasmSymbol>(symbol.name, symbol)));
 
   @override
   Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment}) {
-    return new Pointer<T>.fromAddress(_module.malloc(byteCount), this);
+    return Pointer<T>.fromAddress(_module.malloc(byteCount), this);
   }
 
   @override
@@ -93,14 +93,14 @@ class Memory implements Allocator {
   }
 }
 
-Memory createMemory(Module module) => new Memory._(module);
+Memory createMemory(Module module) => Memory._(module);
 
 WasmSymbol symbolByAddress(Memory m, int address) {
   WasmSymbol? s = m._symbolsByAddress[address];
   if (s != null) {
     return s;
   } else {
-    throw new ArgumentError('Could not find symbol at $address!');
+    throw ArgumentError('Could not find symbol at $address!');
   }
 }
 
@@ -109,7 +109,7 @@ WasmSymbol symbolByName(Memory m, String name) {
   if (s != null) {
     return s;
   } else {
-    throw new ArgumentError('Could not find symbol $name!');
+    throw ArgumentError('Could not find symbol $name!');
   }
 }
 

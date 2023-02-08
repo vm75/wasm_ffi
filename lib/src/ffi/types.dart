@@ -17,7 +17,7 @@ import '../../wasm_ffi_meta.dart';
 ///
 /// Any other operation than comparing (e.g. calling [Pointer.cast])
 /// will result in exceptions.
-final Pointer<Never> nullptr = new Pointer<Never>._null();
+final Pointer<Never> nullptr = Pointer<Never>._null();
 
 /// Number of bytes used by native type T.
 ///
@@ -33,7 +33,7 @@ int sizeOf<T extends NativeType>() {
   if (size != null) {
     return size;
   } else {
-    throw new ArgumentError('The type $T is not known!');
+    throw ArgumentError('The type $T is not known!');
   }
 }
 
@@ -178,7 +178,7 @@ class Char extends Int8 {}
 class Pointer<T extends NativeType> extends NativeType {
   //static Pointer<NativeFunction<T>> fromFunction<T extends Function>(Function f,
   //       [Object? exceptionalReturn]) =>
-  //   throw new UnimplementedError();
+  //   throw UnimplementedError();
 
   /// Access to the raw pointer value.
   final int address;
@@ -196,7 +196,7 @@ class Pointer<T extends NativeType> extends NativeType {
   final int? size;
 
   factory Pointer._null() {
-    return new Pointer._(0, new NullMemory(), null);
+    return Pointer._(0, NullMemory(), null);
   }
 
   /// Constructs a pointer from an address.
@@ -206,16 +206,16 @@ class Pointer<T extends NativeType> extends NativeType {
   factory Pointer.fromAddress(int ptr, [Memory? bindTo]) {
     Memory? memory = bindTo ?? Memory.global;
     if (memory == null) {
-      throw new StateError(
+      throw StateError(
           'No global memory set and no explcity memory to bind to given!');
     }
-    return new Pointer._(ptr, memory, _isUnsizedType<T>() ? null : sizeOf<T>());
+    return Pointer._(ptr, memory, _isUnsizedType<T>() ? null : sizeOf<T>());
   }
 
   Pointer._(this.address, this.boundMemory, this.size);
 
   /// Casts this pointer to an other type.
-  Pointer<U> cast<U extends NativeType>() => new Pointer<U>._(
+  Pointer<U> cast<U extends NativeType>() => Pointer<U>._(
       address, boundMemory, _isUnsizedType<U>() ? null : sizeOf<U>());
 
   /// Pointer arithmetic (takes element size into account).
@@ -225,10 +225,9 @@ class Pointer<T extends NativeType> extends NativeType {
   Pointer<T> elementAt(int index) {
     int? s = size;
     if (s != null) {
-      return new Pointer<T>._(address + index * s, boundMemory, s);
+      return Pointer<T>._(address + index * s, boundMemory, s);
     } else {
-      throw new UnsupportedError(
-          'elementAt is not supported for unsized types!');
+      throw UnsupportedError('elementAt is not supported for unsized types!');
     }
   }
 
@@ -255,8 +254,7 @@ class Pointer<T extends NativeType> extends NativeType {
     if (s != null) {
       return boundMemory.buffer.asByteData(address + index * s, s);
     } else {
-      throw new UnsupportedError(
-          'viewSingle is not supported for unsized types!');
+      throw UnsupportedError('viewSingle is not supported for unsized types!');
     }
   }
 }
@@ -266,9 +264,9 @@ class DynamicLibrary {
   @extra
   final Memory boundMemory;
 
-  /// Creates a new instance based on the given module.
+  /// Creates a instance based on the given module.
   ///
-  /// While for each [DynamicLibrary] a new [Memory] object is
+  /// While for each [DynamicLibrary] a [Memory] object is
   /// created, the [Memory] objects share the backing memory if
   /// they are created based on the same module.
   ///
@@ -287,12 +285,10 @@ class DynamicLibrary {
       case MemoryRegisterMode.no:
         break;
       case MemoryRegisterMode.onlyIfGlobalNotSet:
-        if (Memory.global == null) {
-          Memory.global = memory;
-        }
+        Memory.global ??= memory;
         break;
     }
-    return new DynamicLibrary._(memory);
+    return DynamicLibrary._(memory);
   }
 
   DynamicLibrary._(this.boundMemory);
@@ -308,13 +304,13 @@ class DynamicLibrary {
     WasmSymbol symbol = symbolByName(boundMemory, name);
     if (isNativeFunctionType<T>()) {
       if (symbol is FunctionDescription) {
-        return new Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
+        return Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
       } else {
-        throw new ArgumentError(
+        throw ArgumentError(
             'Tried to look up $name as a function, but it seems it is NOT a function!');
       }
     } else {
-      return new Pointer<T>.fromAddress(symbol.address, boundMemory);
+      return Pointer<T>.fromAddress(symbol.address, boundMemory);
     }
   }
 }

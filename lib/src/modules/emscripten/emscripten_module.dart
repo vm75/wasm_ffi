@@ -17,6 +17,7 @@ external List? _entries(Object? o);
 @anonymous
 class _EmscriptenModuleJs {
   external Uint8List? get wasmBinary;
+  // ignore: non_constant_identifier_names
   external Uint8List? get HEAPU8;
   external Object? get asm;
 
@@ -26,12 +27,12 @@ class _EmscriptenModuleJs {
 
 const String _github = r'https://github.com/vm75/wasm_ffi';
 String _adu(WasmSymbol? original, WasmSymbol? tried) =>
-    'CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at $_github' +
-    '\r\nOriginal: $original' +
+    'CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at $_github'
+    '\r\nOriginal: $original'
     '\r\nTried: $tried';
 
-typedef int _Malloc(int size);
-typedef void _Free(int address);
+typedef _Malloc = int Function(int size);
+typedef _Free = void Function(int address);
 
 FunctionDescription _fromWasmFunction(String name, Function func) {
   String? s = getProperty(func, 'name');
@@ -40,19 +41,19 @@ FunctionDescription _fromWasmFunction(String name, Function func) {
     if (index != null) {
       int? length = getProperty(func, 'length');
       if (length != null) {
-        return new FunctionDescription(
+        return FunctionDescription(
             tableIndex: index,
             name: name,
             function: func,
             argumentCount: length);
       } else {
-        throw new ArgumentError('$name does not seem to be a function symbol!');
+        throw ArgumentError('$name does not seem to be a function symbol!');
       }
     } else {
-      throw new ArgumentError('$name does not seem to be a function symbol!');
+      throw ArgumentError('$name does not seem to be a function symbol!');
     }
   } else {
-    throw new ArgumentError('$name does not seem to be a function symbol!');
+    throw ArgumentError('$name does not seem to be a function symbol!');
   }
 }
 
@@ -71,13 +72,13 @@ class EmscriptenModule extends Module {
   /// Documentation is in `emscripten_module_stub.dart`!
   static Future<EmscriptenModule> process(String moduleName) async {
     Function moduleFunction = _moduleFunction(moduleName);
-    _EmscriptenModuleJs module = new _EmscriptenModuleJs();
+    _EmscriptenModuleJs module = _EmscriptenModuleJs();
     Object? o = moduleFunction(module);
     if (o != null) {
       await promiseToFuture(o);
-      return new EmscriptenModule._fromJs(module);
+      return EmscriptenModule._fromJs(module);
     } else {
-      throw new StateError('Could not instantiate an emscripten module!');
+      throw StateError('Could not instantiate an emscripten module!');
     }
   }
 
@@ -85,14 +86,13 @@ class EmscriptenModule extends Module {
   static Future<EmscriptenModule> compile(
       Uint8List wasmBinary, String moduleName) async {
     Function moduleFunction = _moduleFunction(moduleName);
-    _EmscriptenModuleJs module =
-        new _EmscriptenModuleJs(wasmBinary: wasmBinary);
+    _EmscriptenModuleJs module = _EmscriptenModuleJs(wasmBinary: wasmBinary);
     Object? o = moduleFunction(module);
     if (o != null) {
       await promiseToFuture(o);
-      return new EmscriptenModule._fromJs(module);
+      return EmscriptenModule._fromJs(module);
     } else {
-      throw new StateError('Could not instantiate an emscripten module!');
+      throw StateError('Could not instantiate an emscripten module!');
     }
   }
 
@@ -120,11 +120,10 @@ class EmscriptenModule extends Module {
           if (entry is List) {
             Object value = entry.last;
             if (value is int) {
-              Global g =
-                  new Global(address: value, name: entry.first as String);
+              Global g = Global(address: value, name: entry.first as String);
               if (knownAddresses.containsKey(value) &&
                   knownAddresses[value] is! Global) {
-                throw new StateError(_adu(knownAddresses[value], g));
+                throw StateError(_adu(knownAddresses[value], g));
               }
               knownAddresses[value] = g;
               exports.add(g);
@@ -138,7 +137,7 @@ class EmscriptenModule extends Module {
               if (knownAddresses.containsKey(description.tableIndex) &&
                   knownAddresses[description.tableIndex]
                       is! FunctionDescription) {
-                throw new StateError(
+                throw StateError(
                     _adu(knownAddresses[description.tableIndex], description));
               }
               knownAddresses[description.tableIndex] = description;
@@ -149,29 +148,28 @@ class EmscriptenModule extends Module {
                 free = description.function as _Free;
               }
             } else {
-              throw new StateError(
+              throw StateError(
                   'Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
             }
           } else {
-            throw new StateError(
-                'Unexpected entry in entries(Module[\'asm\'])!');
+            throw StateError('Unexpected entry in entries(Module[\'asm\'])!');
           }
         }
         if (malloc != null) {
           if (free != null) {
-            return new EmscriptenModule._(module, exports, malloc, free);
+            return EmscriptenModule._(module, exports, malloc, free);
           } else {
-            throw new StateError('Module does not export the free function!');
+            throw StateError('Module does not export the free function!');
           }
         } else {
-          throw new StateError('Module does not export the malloc function!');
+          throw StateError('Module does not export the malloc function!');
         }
       } else {
-        throw new StateError(
+        throw StateError(
             'JavaScript error: Could not access entries of Module[\'asm\']!');
       }
     } else {
-      throw new StateError(
+      throw StateError(
           'Could not access Module[\'asm\'], are your sure your module was compiled using emscripten?');
     }
   }

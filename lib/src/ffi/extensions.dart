@@ -35,7 +35,7 @@ extension DynamicLibraryExtension on DynamicLibrary {
   /// This simply calles [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
   /// internally, so see this two methods for additional insights.
   F lookupFunction<T extends Function, F extends Function>(String name) =>
-      this.lookup<NativeFunction<T>>(name).asFunction<F>();
+      lookup<NativeFunction<T>>(name).asFunction<F>();
 }
 
 /// Extension on [Allocator] to provide allocation with [NativeType].
@@ -52,7 +52,7 @@ extension AllocatorAlloc on Allocator {
 extension FloatPointer on Pointer<Float> {
   /// The float at address.
   double get value => this[0];
-  void set value(double value) => this[0] = value;
+  set value(double value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -72,7 +72,7 @@ extension FloatPointer on Pointer<Float> {
 extension DoublePointer on Pointer<Double> {
   /// The double at address.
   double get value => this[0];
-  void set value(double value) => this[0] = value;
+  set value(double value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -92,7 +92,7 @@ extension DoublePointer on Pointer<Double> {
 extension Int8Pointer on Pointer<Int8> {
   /// The 8-bit integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -111,7 +111,7 @@ extension Int8Pointer on Pointer<Int8> {
 extension Int16Pointer on Pointer<Int16> {
   /// The 16-bit integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -130,7 +130,7 @@ extension Int16Pointer on Pointer<Int16> {
 extension Int32Pointer on Pointer<Int32> {
   /// The 32-bit integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -149,7 +149,7 @@ extension Int32Pointer on Pointer<Int32> {
 extension Int64Pointer on Pointer<Int64> {
   /// The 64-bit integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -168,7 +168,7 @@ extension Int64Pointer on Pointer<Int64> {
 extension Uint8Pointer on Pointer<Uint8> {
   /// The 8-bit unsigned integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -187,7 +187,7 @@ extension Uint8Pointer on Pointer<Uint8> {
 extension Uint16Pointer on Pointer<Uint16> {
   /// The 16-bit unsigned integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -207,7 +207,7 @@ extension Uint16Pointer on Pointer<Uint16> {
 extension Uint32Pointer on Pointer<Uint32> {
   /// The 32-bit unsigned integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -227,7 +227,7 @@ extension Uint32Pointer on Pointer<Uint32> {
 extension Uint64Pointer on Pointer<Uint64> {
   /// The 64-bit unsigned integer at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Creates a typed list view backed by memory in the address space.
   ///
@@ -247,7 +247,7 @@ extension Uint64Pointer on Pointer<Uint64> {
 extension IntPtrPointer on Pointer<IntPtr> {
   /// The 32-bit or 64-bit value at `address`.
   int get value => this[0];
-  void set value(int value) => this[0] = value;
+  set value(int value) => this[0] = value;
 
   /// Returns `true` if the size of a pointer is 64-bit, `false` otherwise.
   @extra
@@ -266,14 +266,14 @@ extension IntPtrPointer on Pointer<IntPtr> {
 extension PointerPointer<T extends NativeType> on Pointer<Pointer<T>> {
   /// The pointer at `address`.
   Pointer<T> get value => this[0];
-  void set value(Pointer<T> value) => this[0] = value;
+  set value(Pointer<T> value) => this[0] = value;
 
   /// Returns `true` if the size of a pointer is 64-bit, `false` otherwise.
   @extra
   bool get is64Bit => size == 8;
 
   /// The pointer at `address + size * index`.
-  Pointer<T> operator [](int index) => new Pointer<T>.fromAddress(
+  Pointer<T> operator [](int index) => Pointer<T>.fromAddress(
       is64Bit
           ? viewSingle(index).getUint64(0, Memory.endianess)
           : viewSingle(index).getUint32(0, Memory.endianess),

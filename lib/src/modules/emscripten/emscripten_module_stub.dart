@@ -35,7 +35,7 @@ class EmscriptenModule extends Module {
   /// On platforms where [dart:js](https://api.dart.dev/stable/dart-js/dart-js-library.html)
   /// is not available, an [UnsupportedError] is thrown.
   static Future<EmscriptenModule> process(String moduleName) =>
-      throw new UnsupportedError(
+      throw UnsupportedError(
           'Emscripten operations are only allowed on the web (where dart:js is present)!');
 
   /// Connects to the JavaScript glue of the emscripten module.
@@ -48,24 +48,24 @@ class EmscriptenModule extends Module {
   /// is not available, an [UnsupportedError] is thrown.
   static Future<EmscriptenModule> compile(
           Uint8List wasmBinary, String moduleName) =>
-      throw new UnsupportedError(
+      throw UnsupportedError(
           'Emscripten operations are only allowed on the web (where dart:js is present)!');
 
   EmscriptenModule._();
 
   @override
-  List<WasmSymbol> get exports => throw new UnsupportedError(
+  List<WasmSymbol> get exports => throw UnsupportedError(
       'Emscripten operations are only allowed on the web (where dart:js is present)!');
 
   @override
-  void free(int pointer) => throw new UnsupportedError(
+  void free(int pointer) => throw UnsupportedError(
       'Emscripten operations are only allowed on the web (where dart:js is present)!');
 
   @override
-  ByteBuffer get heap => throw new UnsupportedError(
+  ByteBuffer get heap => throw UnsupportedError(
       'Emscripten operations are only allowed on the web (where dart:js is present)!');
 
   @override
-  int malloc(int size) => throw new UnsupportedError(
+  int malloc(int size) => throw UnsupportedError(
       'Emscripten operations are only allowed on the web (where dart:js is present)!');
 }

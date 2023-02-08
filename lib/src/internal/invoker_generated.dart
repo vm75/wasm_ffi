@@ -13,7 +13,7 @@ class OpaqueInvokeHelper<T extends Opaque> extends InvokeHelper<Pointer<T>> {
 
   @override
   InvokeHelper<Pointer<T>> copyWith(Function base, Memory memory) {
-    return new OpaqueInvokeHelper<T>(base, memory);
+    return OpaqueInvokeHelper<T>(base, memory);
   }
 
   @override
@@ -145,7 +145,7 @@ class OpaqueInvokeHelper<T extends Opaque> extends InvokeHelper<Pointer<T>> {
           dynamic arg124,
           dynamic arg125,
           dynamic arg126]) =>
-      new InvokeHelper<Pointer<Opaque>>(_base, _memory)
+      InvokeHelper<Pointer<Opaque>>(_base, _memory)
           .run(
               arg0,
               arg1,
@@ -284,7 +284,7 @@ class OpaqueInvokeHelperSquare<T extends Opaque>
 
   @override
   InvokeHelper<Pointer<Pointer<T>>> copyWith(Function base, Memory memory) {
-    return new OpaqueInvokeHelperSquare<T>(base, memory);
+    return OpaqueInvokeHelperSquare<T>(base, memory);
   }
 
   @override
@@ -416,7 +416,7 @@ class OpaqueInvokeHelperSquare<T extends Opaque>
           dynamic arg124,
           dynamic arg125,
           dynamic arg126]) =>
-      new InvokeHelper<Pointer<Pointer<Opaque>>>(_base, _memory)
+      InvokeHelper<Pointer<Pointer<Opaque>>>(_base, _memory)
           .run(
               arg0,
               arg1,
@@ -555,7 +555,7 @@ class InvokeHelper<T> {
   const InvokeHelper(this._base, this._memory);
 
   InvokeHelper<T> copyWith(Function base, Memory memory) {
-    return new InvokeHelper(base, memory);
+    return InvokeHelper(base, memory);
   }
 
   T run(

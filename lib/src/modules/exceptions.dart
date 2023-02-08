@@ -14,5 +14,5 @@ class MarshallingException implements Exception {
       : this('Expected a type of $t but object has type ${o.runtimeType}');
 
   @override
-  String toString() => new Exception(message).toString();
+  String toString() => Exception(message).toString();
 }

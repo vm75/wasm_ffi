@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import '../ffi/types.dart';
 
 /// Hacky workadround, see https://github.com/dart-lang/language/issues/123

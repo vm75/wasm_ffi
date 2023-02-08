@@ -1,3 +1,6 @@
+## [0.9.4]
+* Fixed analyzer warnings
+
 ## [0.9.3]
 * Fixed github links
 

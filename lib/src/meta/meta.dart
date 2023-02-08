@@ -1,30 +1,30 @@
-class _Extra {
-  const _Extra();
+class Extra {
+  const Extra();
 }
 
 /// A class, field or method annotated with extra is present in `wasm_ffi`,
 /// but not in `dart:ffi`.
-const _Extra extra = const _Extra();
+const Extra extra = Extra();
 
-class _NoGeneric {
-  const _NoGeneric();
+class NoGeneric {
+  const NoGeneric();
 }
 
 /// If a class which is annotead with [noGeneric] is extended or implemented,
 /// the derived class MUST NOT impose a type argument!
-const _NoGeneric noGeneric = const _NoGeneric();
+const NoGeneric noGeneric = NoGeneric();
 
-class _NotConstructible {
-  const _NotConstructible();
+class NotConstructible {
+  const NotConstructible();
 }
 
 /// A [NativeType] annotated with unsized should not be instantiated.
 ///
 /// However, they are not marked as `abstract` to meet the dart:ffi API.
-const _NotConstructible notConstructible = const _NotConstructible();
+const NotConstructible notConstructible = NotConstructible();
 
-class _Unsized {
-  const _Unsized();
+class Unsized {
+  const Unsized();
 }
 
 /// A [NativeType] annotated with unsized does not have a predefined size.
@@ -32,4 +32,4 @@ class _Unsized {
 /// Unsized [NativeType]s do not support [sizeOf] because their size is unknown,
 /// so calling [sizeOf] with an @[unsized] [NativeType] will throw an exception.
 /// Consequently, [Pointer.elementAt] is not available and will also throw an exception.
-const _Unsized unsized = const _Unsized();
+const Unsized unsized = Unsized();

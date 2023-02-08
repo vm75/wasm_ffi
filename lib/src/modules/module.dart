@@ -50,6 +50,7 @@ abstract class WasmSymbol {
   const WasmSymbol({required this.address, required this.name});
 
   @override
+  // ignore: hash_and_equals
   int get hashCode => toString().hashCode;
 
   @override
@@ -65,6 +66,7 @@ class Global extends WasmSymbol {
       : super(address: address, name: name);
 
   @override
+  // ignore: hash_and_equals
   bool operator ==(dynamic other) {
     if (other != null && other is Global) {
       return name == other.name && address == other.address;
