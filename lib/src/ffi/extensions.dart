@@ -13,7 +13,7 @@ extension NativeFunctionPointer<NF extends Function>
   /// Convert to Dart function, automatically marshalling the arguments and return value.
   ///
   /// There are several rules that apply for the return type of `DF`, see
-  /// the list of [allowed return types](https://github.com/EPNW/wasm_ffi/blob/master/return_types.md).
+  /// the list of [allowed return types](https://github.com/vm75/wasm_ffi/blob/master/return_types.md).
   /// If marshalling failes, a [MarshallingException] is thrown.
   ///
   /// If this is called on a pointer that does not point to a function,

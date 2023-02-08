@@ -3,7 +3,7 @@
 
 The general idea is to expose an API that is compatible with `dart:ffi` but translates all calls through `dart:js` to a browser running `WebAssembly`.
 
-Currently, only `WebAssembly` compiled with [emscripten](https://emscripten.org/) is usable because emscripten also generates the JavaScript imports `WebAssembly` needs. Open a issue on [GitHub](https://github.com/EPNW/wasm_ffi/) if you think we should support other platforms/compilers, too.
+Currently, only `WebAssembly` compiled with [emscripten](https://emscripten.org/) is usable because emscripten also generates the JavaScript imports `WebAssembly` needs. Open a issue on [GitHub](https://github.com/vm75/wasm_ffi/) if you think we should support other platforms/compilers, too.
 
 For a tutorial how to use this package (including the compiler settings for emscripten) see the [example/README](./example/README.md), but make sure to read this README first!
 
@@ -26,11 +26,11 @@ There are some rules and things to notice when working with functions:
     * You may nest the pointer type up to two times but not more:
         * e.g. `Pointer<Int32>` and `Pointer<Pointer<Int32>>` are allowed but `Pointer<Pointer<Pointer<Int32>>>` is not.
     * If the return type is `Pointer<NativeFunction>` you MUST use `Pointer<NativeFunction<dynamic>>`, everything else will fail. You can restore the type arguments afterwards yourself using casting. On the other hand, as stated above, type arguments for `NativeFunction`s are just ignored anyway.
-    * To concretize the things above, [return_types.md](https://github.com/EPNW/wasm_ffi/tree/master/return_types.md) lists what may be used as return type, everyhing else will cause a runtime error.
+    * To concretize the things above, [return_types.md](https://github.com/vm75/wasm_ffi/tree/master/return_types.md) lists what may be used as return type, everyhing else will cause a runtime error.
     * WORKAROUND: If you need something else (e.g. `Pointer<Pointer<Pointer<Double>>>`), use `Pointer<IntPtr>` and cast it yourselfe afterwards using [`Pointer.cast()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/cast.html).
 
 ## Memory
 The first call you sould do when you want to use `wasm_ffi` is [`Memory.init()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Memory/init.html). It has an optional parameter where you can adjust your pointer size. The argument defaults to 4 to represent 32bit pointers, if you use wasm64, call `Memory.init(8)`.
-Contraty to `dart:ffi` where the dart process shares all the memory, on `WebAssembly`, each instance is bound to a `WebAssembly.Memory` object. For now, we assume that every `WebAssembly` module you use has it's own memory. If you think we should change that, open a issue on [GitHub](https://github.com/EPNW/wasm_ffi/) and report your usecase.
+Contraty to `dart:ffi` where the dart process shares all the memory, on `WebAssembly`, each instance is bound to a `WebAssembly.Memory` object. For now, we assume that every `WebAssembly` module you use has it's own memory. If you think we should change that, open a issue on [GitHub](https://github.com/vm75/wasm_ffi/) and report your usecase.
 Every pointer you use is bound to a memory object. This memory object is accessible using the [`@extra Pointer.boundMemory`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/boundMemory.html) field. If you want to create a Pointer using the [`Pointer.fromAddress()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/Pointer.fromAddress.html) constructor, you may notice the optional `bindTo` parameter. Since each pointer must be bound to a memory object, you can explicitly speficy a memory object here. To match the `dart:ffi` API, the `bindTo` parameter is optional. Because it is optional, there has to be a fallback mechanism if no `bindTo` is specified: The static [`Memory.global`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Memory/global.html) field. If that field is also not set, an exception is thrown when invoking the `Pointer.fromAddress()` constructor.
 Also, each [`DynamicLibrary`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary-class.html) is bound to a memory object, which is again accessible with [`@extra DynamicLibrary.boundMemory`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/boundMemory.html). This might come in handy, since `Memory` implements the [`Allocator`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Allocator-class.html) class.

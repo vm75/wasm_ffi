@@ -24,7 +24,7 @@ class _EmscriptenModuleJs {
   external factory _EmscriptenModuleJs({Uint8List wasmBinary});
 }
 
-const String _github = r'https://github.com/EPNW/wasm_ffi';
+const String _github = r'https://github.com/vm75/wasm_ffi';
 String _adu(WasmSymbol? original, WasmSymbol? tried) =>
     'CRITICAL EXCEPTION! Address double use! This should never happen, please report this issue on github immediately at $_github' +
     '\r\nOriginal: $original' +
