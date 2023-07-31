@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import '../ffi/types.dart';
+import '../ffi/utf8.dart';
 import '../modules/exceptions.dart';
 import '../modules/memory.dart';
 import 'invoker_generated.dart';
@@ -178,6 +179,12 @@ T _toDartType<T>(Object o, Memory bind) {
       } else {
         throw MarshallingException.noAddress(o);
       }
+    } else if (T == Pointer_Utf8) {
+      if (o is int) {
+        return Pointer<Utf8>.fromAddress(o, bind) as T;
+      } else {
+        throw MarshallingException.noAddress(o);
+      }
     } else if (T == Pointer_Opaque) {
       if (o is int) {
         return Pointer<Opaque>.fromAddress(o, bind) as T;
@@ -260,6 +267,12 @@ T _toDartType<T>(Object o, Memory bind) {
       } else if (T == Pointer_Pointer_Char) {
         if (o is int) {
           return Pointer<Pointer<Char>>.fromAddress(o, bind) as T;
+        } else {
+          throw MarshallingException.noAddress(o);
+        }
+      } else if (T == Pointer_Pointer_Utf8) {
+        if (o is int) {
+          return Pointer<Pointer<Utf8>>.fromAddress(o, bind) as T;
         } else {
           throw MarshallingException.noAddress(o);
         }
