@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import '../ffi/types.dart';
+import '../ffi/utf8.dart';
 
 /// Hacky workadround, see https://github.com/dart-lang/language/issues/123
 Type _extractType<T>() => T;
@@ -20,6 +21,7 @@ final Type Pointer_Uint16 = _extractType<Pointer<Uint16>>();
 final Type Pointer_Uint32 = _extractType<Pointer<Uint32>>();
 final Type Pointer_Uint64 = _extractType<Pointer<Uint64>>();
 final Type Pointer_Char = _extractType<Pointer<Char>>();
+final Type Pointer_Utf8 = _extractType<Pointer<Utf8>>();
 final Type Pointer_Float = _extractType<Pointer<Float>>();
 final Type Pointer_Opaque = _extractType<Pointer<Opaque>>();
 final Type Pointer_Pointer_IntPtr = _extractType<Pointer<Pointer<IntPtr>>>();
@@ -34,6 +36,7 @@ final Type Pointer_Pointer_Uint16 = _extractType<Pointer<Pointer<Uint16>>>();
 final Type Pointer_Pointer_Uint32 = _extractType<Pointer<Pointer<Uint32>>>();
 final Type Pointer_Pointer_Uint64 = _extractType<Pointer<Pointer<Uint64>>>();
 final Type Pointer_Pointer_Char = _extractType<Pointer<Pointer<Char>>>();
+final Type Pointer_Pointer_Utf8 = _extractType<Pointer<Pointer<Utf8>>>();
 final Type Pointer_Pointer_Float = _extractType<Pointer<Pointer<Float>>>();
 final Type Pointer_Pointer_Opaque = _extractType<Pointer<Pointer<Opaque>>>();
 final Type Pointer_NativeFunction_dynamic =
