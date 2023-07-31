@@ -291,6 +291,8 @@ class DynamicLibrary {
     return DynamicLibrary._(memory);
   }
 
+  factory DynamicLibrary.open(String path) => UnimplementedError();
+
   DynamicLibrary._(this.boundMemory);
 
   /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
