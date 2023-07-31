@@ -147,9 +147,11 @@ class EmscriptenModule extends Module {
               } else if (description.name == 'free') {
                 free = description.function as _Free;
               }
+            } else if (entry.first as String == "memory") {
+              // ignore memory object
             } else {
-              throw StateError(
-                  'Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
+              print(
+                  'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
             }
           } else {
             throw StateError('Unexpected entry in entries(Module[\'asm\'])!');
