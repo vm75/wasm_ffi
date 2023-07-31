@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
 import '../module.dart';
+import '../table.dart';
 import '../../../wasm_ffi_meta.dart';
 
 @JS('globalThis')
@@ -100,6 +101,7 @@ class EmscriptenModule extends Module {
 
   final _EmscriptenModuleJs _emscriptenModuleJs;
   final List<WasmSymbol> _exports;
+  final Table? indirectFunctionTable;
   final _Malloc _malloc;
   final _Free _free;
 
@@ -107,7 +109,7 @@ class EmscriptenModule extends Module {
   List<WasmSymbol> get exports => _exports;
 
   EmscriptenModule._(
-      this._emscriptenModuleJs, this._exports, this._malloc, this._free);
+      this._emscriptenModuleJs, this._exports, this.indirectFunctionTable, this._malloc, this._free);
 
   factory EmscriptenModule._fromJs(_EmscriptenModuleJs module) {
     Object? asm = module.wasmExports ?? module.asm;
@@ -117,6 +119,7 @@ class EmscriptenModule extends Module {
       _Free? free;
       List<WasmSymbol> exports = [];
       List? entries = _entries(asm);
+      Table? indirectFunctionTable;
       if (entries != null) {
         for (dynamic entry in entries) {
           if (entry is List) {
@@ -149,6 +152,8 @@ class EmscriptenModule extends Module {
               } else if (description.name == 'free') {
                 free = description.function as _Free;
               }
+            } else if (value is Table && entry.first as String == "__indirect_function_table") {
+              indirectFunctionTable = value;
             } else if (entry.first as String == "memory") {
               // ignore memory object
             } else {
@@ -161,7 +166,7 @@ class EmscriptenModule extends Module {
         }
         if (malloc != null) {
           if (free != null) {
-            return EmscriptenModule._(module, exports, malloc, free);
+            return EmscriptenModule._(module, exports, indirectFunctionTable, malloc, free);
           } else {
             throw StateError('Module does not export the free function!');
           }

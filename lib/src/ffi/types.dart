@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import '../modules/module.dart';
 import '../modules/memory.dart';
 import '../modules/null_memory.dart';
+import '../modules/table.dart';
 
 import '../internal/type_utils.dart';
 
@@ -313,11 +314,13 @@ class DynamicLibrary {
     switch (registerMode) {
       case MemoryRegisterMode.yes:
         Memory.global = memory;
+        Table.global ??= module.indirectFunctionTable!;
         break;
       case MemoryRegisterMode.no:
         break;
       case MemoryRegisterMode.onlyIfGlobalNotSet:
         Memory.global ??= memory;
+        Table.global ??= module.indirectFunctionTable!;
         break;
     }
     return DynamicLibrary._(memory);
