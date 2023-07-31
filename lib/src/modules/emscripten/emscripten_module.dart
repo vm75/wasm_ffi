@@ -194,4 +194,6 @@ class EmscriptenModule extends Module {
 
   @override
   int malloc(int size) => _malloc(size);
+
+  _EmscriptenModuleJs get module => _emscriptenModuleJs;
 }
