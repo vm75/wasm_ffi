@@ -1,5 +1,6 @@
 ## [0.9.5]
 * Improved support for `Pointer<Utf8>`
+* Added missing types `UintPtr`, `Bool`, `Int` and `UnsignedInt`
 
 ## [0.9.4]
 * Fixed analyzer warnings

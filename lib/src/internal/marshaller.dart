@@ -111,6 +111,24 @@ T _toDartType<T>(Object o, Memory bind) {
       } else {
         throw MarshallingException.noAddress(o);
       }
+    } else if (T == Pointer_UintPtr) {
+      if (o is int) {
+        return Pointer<UintPtr>.fromAddress(o, bind) as T;
+      } else {
+        throw MarshallingException.noAddress(o);
+      }
+    } else if (T == Pointer_Bool) {
+      if (o is int) {
+        return Pointer<Bool>.fromAddress(o, bind) as T;
+      } else {
+        throw MarshallingException.noAddress(o);
+      }
+    } else if (T == Pointer_Int) {
+      if (o is int) {
+        return Pointer<Int>.fromAddress(o, bind) as T;
+      } else {
+        throw MarshallingException.noAddress(o);
+      }
     } else if (T == Pointer_Int8) {
       if (o is int) {
         return Pointer<Int8>.fromAddress(o, bind) as T;
@@ -138,6 +156,12 @@ T _toDartType<T>(Object o, Memory bind) {
     } else if (T == Pointer_Double) {
       if (o is int) {
         return Pointer<Double>.fromAddress(o, bind) as T;
+      } else {
+        throw MarshallingException.noAddress(o);
+      }
+    } else if (T == Pointer_UnsignedInt) {
+      if (o is int) {
+        return Pointer<UnsignedInt>.fromAddress(o, bind) as T;
       } else {
         throw MarshallingException.noAddress(o);
       }
@@ -208,6 +232,24 @@ T _toDartType<T>(Object o, Memory bind) {
         } else {
           throw MarshallingException.noAddress(o);
         }
+      } else if (T == Pointer_Pointer_UintPtr) {
+        if (o is int) {
+          return Pointer<Pointer<UintPtr>>.fromAddress(o, bind) as T;
+        } else {
+          throw MarshallingException.noAddress(o);
+        }
+      } else if (T == Pointer_Pointer_Bool) {
+        if (o is int) {
+          return Pointer<Pointer<Bool>>.fromAddress(o, bind) as T;
+        } else {
+          throw MarshallingException.noAddress(o);
+        }
+      } else if (T == Pointer_Pointer_Int) {
+        if (o is int) {
+          return Pointer<Pointer<Int>>.fromAddress(o, bind) as T;
+        } else {
+          throw MarshallingException.noAddress(o);
+        }
       } else if (T == Pointer_Pointer_Int8) {
         if (o is int) {
           return Pointer<Pointer<Int8>>.fromAddress(o, bind) as T;
@@ -235,6 +277,12 @@ T _toDartType<T>(Object o, Memory bind) {
       } else if (T == Pointer_Pointer_Double) {
         if (o is int) {
           return Pointer<Pointer<Double>>.fromAddress(o, bind) as T;
+        } else {
+          throw MarshallingException.noAddress(o);
+        }
+      } else if (T == Pointer_Pointer_UnsignedInt) {
+        if (o is int) {
+          return Pointer<Pointer<UnsignedInt>>.fromAddress(o, bind) as T;
         } else {
           throw MarshallingException.noAddress(o);
         }
