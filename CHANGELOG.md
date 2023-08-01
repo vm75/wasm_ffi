@@ -2,6 +2,7 @@
 * Fixed compatibility with Emscripten 3.1.44
 * Improved support for `Pointer<Utf8>`
 * Added missing types `UintPtr`, `Bool`, `Int` and `UnsignedInt`
+* Added `Arena` (added in Dart ffi 1.1.0)
 
 ## [0.9.4]
 * Fixed analyzer warnings
