@@ -65,6 +65,14 @@ class Double extends NativeType {}
 @notConstructible
 class Float extends NativeType {}
 
+/// The C `int` type.
+///
+/// Int is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class Int extends NativeType {}
+
 /// Represents a native signed 8 bit integer in C.
 ///
 /// Int8 is not constructible in the Dart code and serves
@@ -96,6 +104,14 @@ class Int32 extends NativeType {}
 @sealed
 @notConstructible
 class Int64 extends NativeType {}
+
+/// The C `unsigned int` type.
+///
+/// Int is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class UnsignedInt extends NativeType {}
 
 /// Represents a native unsigned 8 bit integer in C.
 ///
@@ -136,6 +152,22 @@ class Uint64 extends NativeType {}
 @sealed
 @notConstructible
 class IntPtr extends NativeType {}
+
+/// Represents a native pointer-sized unsigned integer in C.
+///
+/// IntPtr is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class UintPtr extends NativeType {}
+
+/// Represents a native bool in C.
+///
+/// Bool is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class Bool extends NativeType {}
 
 /// Represents a function type in C.
 ///
