@@ -87,10 +87,11 @@ class EmscriptenModule extends Module {
 
   /// Documentation is in `emscripten_module_stub.dart`!
   static Future<EmscriptenModule> compile(
-      Uint8List wasmBinary, String moduleName) async {
+      Uint8List wasmBinary, String moduleName, {void Function(_EmscriptenModuleJs)? preinit}) async {
     Function moduleFunction = _moduleFunction(moduleName);
     _EmscriptenModuleJs module = _EmscriptenModuleJs(wasmBinary: wasmBinary);
     Object? o = moduleFunction(module);
+    preinit?.call(module);
     if (o != null) {
       await promiseToFuture(o);
       return EmscriptenModule._fromJs(module);
