@@ -456,8 +456,8 @@ String _getWasmSignature<T extends Function>() {
   List<String> argTypesList =
       argTypes.substring(1, argTypes.length - 1).split(', ');
 
-  print("types: $retType $argTypesList");
-  print("sigs: ${signatures.keys}");
+  //print("types: $retType $argTypesList");
+  //print("sigs: ${signatures.keys}");
 
   return [retType, ...argTypesList].map((s) => signatures[s] ?? 'i').join();
 }
@@ -474,6 +474,8 @@ final List<Function Function(Function)> callbackHelpers = [
       (arg1, arg2, arg3, arg4, arg5) => func([arg1, arg2, arg3, arg4, arg5]),
   (Function func) => (arg1, arg2, arg3, arg4, arg5, arg6) =>
       func([arg1, arg2, arg3, arg4, arg5, arg6]),
+  (Function func) => (arg1, arg2, arg3, arg4, arg5, arg6, arg7) =>
+      func([arg1, arg2, arg3, arg4, arg5, arg6, arg7]),
 ];
 
 Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
@@ -481,11 +483,11 @@ Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
   // TODO: garbage collect
 
   return exportedFunctions.putIfAbsent(func, () {
-    print("marshal from: ${func.runtimeType} to $T");
+    //print("marshal from: ${func.runtimeType} to $T");
     String dartSignature = func.runtimeType.toString();
     String argTypes = dartSignature.split('=>').first.trim();
     List<String> argT = argTypes.substring(1, argTypes.length - 1).split(', ');
-    print("arg types: $argT");
+    //print("arg types: $argT");
     List<Function> marshallers = argTypes
         .substring(1, argTypes.length - 1)
         .split(', ')
@@ -494,16 +496,20 @@ Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
 
     String wasmSignature = _getWasmSignature<T>();
 
-    print("wasm sig: $wasmSignature");
+    //print("wasm sig: $wasmSignature");
 
     Function wrapper1 = (List args) {
-      print("wrapper of $T called with $args");
+      //print("wrapper of $T called with $args");
       final marshalledArgs =
           marshallers.mapIndexed((i, m) => m(args[i], memory)).toList();
-      print("which is $marshalledArgs on $func");
+      //print("which is $marshalledArgs on $func");
       Function.apply(func, marshalledArgs);
-      print("done!");
+      //print("done!");
     };
+
+    assert(argT.length < callbackHelpers.length,
+        "${argT.length} arguments not supported");
+
     Function wrapper2 = callbackHelpers[argT.length](wrapper1);
 
 //    theFunctions.add(wrapper);
@@ -511,7 +517,7 @@ Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
     final wasmFunc = _toWasmFunction(wasmSignature, wrapper2);
     table.grow(1);
     table.set(table.length - 1, wasmFunc);
-    print("created callback with index ${table.length - 1}");
+    //print("created callback with index ${table.length - 1}");
     return Pointer<NativeFunction<T>>.fromAddress(table.length - 1, memory);
   }) as Pointer<NativeFunction<T>>;
 }
