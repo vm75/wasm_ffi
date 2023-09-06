@@ -94,6 +94,8 @@ T _toDartType<T>(Object o, Memory bind) {
   } else if (T == bool) {
     if (o is bool) {
       return o as T;
+    } else if (o is int) {
+      return ((o as int) != 0) as T;
     } else {
       throw MarshallingException.typeMissmatch(T, o);
     }
@@ -275,7 +277,7 @@ T _toDartType<T>(Object o, Memory bind) {
         }
       } else {
         throw MarshallingException(
-            'Can not back-marshall to type $T (object type is ${o.runtimeType}');
+            'Can not back-marshall to type $T (object type is ${o.runtimeType})');
       }
     }
   }

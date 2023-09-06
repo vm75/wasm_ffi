@@ -19,7 +19,9 @@ class _EmscriptenModuleJs {
   external Uint8List? get wasmBinary;
   // ignore: non_constant_identifier_names
   external Uint8List? get HEAPU8;
-  external Object? get asm;
+
+  external Object? get asm; // Emscripten <3.1.44
+  external Object? get wasmExports; // Emscripten >=3.1.44
 
   // Must have an unnamed factory constructor with named arguments.
   external factory _EmscriptenModuleJs({Uint8List wasmBinary});
@@ -108,7 +110,7 @@ class EmscriptenModule extends Module {
       this._emscriptenModuleJs, this._exports, this._malloc, this._free);
 
   factory EmscriptenModule._fromJs(_EmscriptenModuleJs module) {
-    Object? asm = module.asm;
+    Object? asm = module.wasmExports ?? module.asm;
     if (asm != null) {
       Map<int, WasmSymbol> knownAddresses = {};
       _Malloc? malloc;
@@ -147,9 +149,11 @@ class EmscriptenModule extends Module {
               } else if (description.name == 'free') {
                 free = description.function as _Free;
               }
+            } else if (entry.first as String == "memory") {
+              // ignore memory object
             } else {
-              throw StateError(
-                  'Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
+              print(
+                  'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
             }
           } else {
             throw StateError('Unexpected entry in entries(Module[\'asm\'])!');
@@ -190,4 +194,6 @@ class EmscriptenModule extends Module {
 
   @override
   int malloc(int size) => _malloc(size);
+
+  _EmscriptenModuleJs get module => _emscriptenModuleJs;
 }
