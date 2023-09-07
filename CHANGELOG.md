@@ -1,3 +1,8 @@
+## [0.9.5]
+* Improved support for `Pointer<Utf8>`
+* Added missing types `UintPtr`, `Bool`, `Int` and `UnsignedInt`
+* Added `Arena` (added in Dart ffi 1.1.0)
+
 ## [0.9.4]
 * Fixed analyzer warnings
 
