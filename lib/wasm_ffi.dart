@@ -3,6 +3,7 @@
 library wasm_ffi;
 
 export 'src/ffi/arena.dart';
-export 'src/ffi/types.dart';
 export 'src/ffi/extensions.dart';
+export 'src/ffi/types.dart';
 export 'src/ffi/utf8.dart';
+export 'wasm_ffi_modules.dart';

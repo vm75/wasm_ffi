@@ -1,7 +1,5 @@
 // Notice that in this file, we import wasm_ffi and not proxy_ffi.dart
 import 'package:wasm_ffi/wasm_ffi.dart';
-// and additionally
-import 'package:wasm_ffi/wasm_ffi_modules.dart';
 
 Module? _module;
 

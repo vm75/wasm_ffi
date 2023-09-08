@@ -4,8 +4,8 @@ library emscripten_module;
 import 'dart:typed_data';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
-import '../module.dart';
 import '../../../wasm_ffi_meta.dart';
+import '../module.dart';
 
 @JS('globalThis')
 external Object get _globalThis;
@@ -152,8 +152,9 @@ class EmscriptenModule extends Module {
             } else if (entry.first as String == "memory") {
               // ignore memory object
             } else {
-              print(
-                  'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
+              // ignore unknown entries
+              // throw StateError(
+              //     'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
             }
           } else {
             throw StateError('Unexpected entry in entries(Module[\'asm\'])!');
@@ -195,5 +196,5 @@ class EmscriptenModule extends Module {
   @override
   int malloc(int size) => _malloc(size);
 
-  _EmscriptenModuleJs get module => _emscriptenModuleJs;
+  // _EmscriptenModuleJs get module => _emscriptenModuleJs;
 }

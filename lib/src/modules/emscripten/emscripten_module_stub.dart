@@ -1,7 +1,6 @@
 import 'dart:typed_data';
-import '../module.dart';
-
 import '../../../wasm_ffi_meta.dart';
+import '../module.dart';
 
 /// Provides access to WebAssembly compiled with [emscripten](https://emscripten.org).
 ///

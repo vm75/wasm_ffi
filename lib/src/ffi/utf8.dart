@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
-import 'types.dart';
 import 'extensions.dart';
+import 'types.dart';
 
 /// The contents of a native zero-terminated array of UTF-8 code units.
 ///

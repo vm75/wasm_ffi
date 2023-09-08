@@ -1,11 +1,9 @@
 import 'dart:typed_data';
-import 'types.dart';
-
+import '../../wasm_ffi_meta.dart';
+import '../internal/marshaller.dart';
 import '../modules/memory.dart';
 import '../modules/module.dart';
-import '../internal/marshaller.dart';
-
-import '../../wasm_ffi_meta.dart';
+import 'types.dart';
 
 /// Extension on [Pointer] specialized for the type argument [NativeFunction].
 extension NativeFunctionPointer<NF extends Function>

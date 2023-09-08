@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'src/proxy_ffi.dart';
 import 'src/c_strings.dart';
 import 'src/generated.dart';
+import 'src/proxy_ffi.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import '../modules/memory.dart';
 import 'types.dart';
 
-R using<R>(R Function(Arena) computation, Allocator wrappedAllocator) {
-  final arena = Arena(wrappedAllocator);
+R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {
+  final arena = Arena(wrappedAllocator ?? Memory.global!);
   bool isAsync = false;
   try {
     final result = computation(arena);
@@ -47,7 +48,8 @@ class Arena implements Allocator {
   ///
   /// The [allocator] is used to do the actual allocation and freeing of
   /// memory. It defaults to using [calloc].
-  Arena(Allocator allocator) : _wrappedAllocator = allocator;
+  Arena([Allocator? allocator])
+      : _wrappedAllocator = allocator ?? Memory.global!;
 
   /// Allocates memory and includes it in the arena.
   ///

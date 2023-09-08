@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import '../../wasm_ffi_meta.dart';
+import '../../wasm_ffi_modules.dart';
+import '../ffi/types.dart';
 
 /// Base class to interact with the WebAssembly.
 ///
-/// Currently, only [emscripten](https://emscripten.org) compiled WebAssembly is supported,
-/// so the only concrete implementation if this class is [EmscriptenModule].
+/// Currently, only [emscripten](https://emscripten.org) compiled WebAssembly is supported.
+/// Two modes are supported, with js and standalone, the respective concrete
+/// implementation are [EmscriptenModule] and [StandaloneWasmModule].
 ///
 /// To support additional mechanisms/frameworks/compilers, create a subclass of
 /// [Module].
@@ -35,6 +38,14 @@ abstract class Module {
   /// A list containing everything exported by the underlying
   /// [WebAssembly instance](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Instance).
   List<WasmSymbol> get exports;
+
+  /// Creates a [DynamicLibrary] instance from this [Module].
+  /// This is used to interact with the WebAssembly from Dart.
+  DynamicLibrary getLibrary(
+      [MemoryRegisterMode mode = MemoryRegisterMode.onlyIfGlobalNotSet]) {
+    Memory.init();
+    return DynamicLibrary.fromModule(this, mode);
+  }
 }
 
 /// Describes something exported by the WebAssembly.

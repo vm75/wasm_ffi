@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
-import 'module.dart';
-
-import '../ffi/utf8.dart';
-import '../ffi/types.dart';
-import '../internal/marshaller.dart';
 import '../../wasm_ffi_meta.dart';
+import '../ffi/types.dart';
+import '../ffi/utf8.dart';
+import '../internal/marshaller.dart';
+import 'module.dart';
 
 final Map<Type, int> sizeMap = {};
 
@@ -25,6 +24,9 @@ void _registerType<T extends NativeType>(int size) {
 /// Represents the native heap.
 @extra
 class Memory implements Allocator {
+  /// Tracks if [Memory] has been initialized.
+  static bool _initalized = false;
+
   /// The endianess of data stored.
   ///
   /// The WebAssembly speficiation defines little endianess, so this is a constant.
@@ -36,6 +38,10 @@ class Memory implements Allocator {
   /// of pointers. It defaults to `4` since WebAssembly usually uses 32 bit pointers.
   /// If you want to use wasm64, set [pointerSizeBytes] to `8` to denote 64 bit pointers.
   static void init([int pointerSizeBytes = 4]) {
+    if (_initalized) {
+      return;
+    }
+    _initalized = true;
     _registerType<Float>(4);
     _registerType<Double>(8);
     _registerType<Int8>(1);

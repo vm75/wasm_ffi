@@ -1,13 +1,11 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
-import '../modules/module.dart';
-import '../modules/memory.dart';
-import '../modules/null_memory.dart';
-
-import '../internal/type_utils.dart';
-
 import '../../wasm_ffi_meta.dart';
+import '../internal/type_utils.dart';
+import '../modules/memory.dart';
+import '../modules/module.dart';
+import '../modules/null_memory.dart';
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
 /// e.g. a pointer with address 0.
@@ -323,7 +321,7 @@ class DynamicLibrary {
     return DynamicLibrary._(memory);
   }
 
-  factory DynamicLibrary.open(String path) => UnimplementedError();
+  factory DynamicLibrary.open(String path) => throw UnimplementedError();
 
   DynamicLibrary._(this.boundMemory);
 

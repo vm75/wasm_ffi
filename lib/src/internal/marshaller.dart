@@ -111,7 +111,7 @@ T _toDartType<T>(Object o, Memory bind) {
     if (o is bool) {
       return o as T;
     } else if (o is int) {
-      return ((o as int) != 0) as T;
+      return (o != 0) as T;
     } else {
       throw MarshallingException.typeMissmatch(T, o);
     }
