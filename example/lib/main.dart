@@ -5,28 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:inject_js/inject_js.dart';
 import 'src/wasm_bindings.dart';
 
-Future<Module> initStandalone() async {
-  // Load the WebAssembly binaries from assets
-  String path = 'assets/standalone.wasm';
-  Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
-
-  // After we loaded the wasm binaries and injected the js code
-  // into our webpage, we obtain a module
-  return await StandaloneWasmModule.compile(wasmBinaries, "WasmFfi");
-}
-
-Future<Module> initEmscripten() async {
-  await importLibrary('assets/emscripten.js');
-
-  // Load the WebAssembly binaries from assets
-  String path = 'assets/emscripten.wasm';
-  Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
-
-  // After we loaded the wasm binaries and injected the js code
-  // into our webpage, we obtain a module
-  return await EmscriptenModule.compile(wasmBinaries, "WasmFfi");
-}
-
 String fromCString(Pointer<Char> cString) {
   int len = 0;
   while (cString[len] != 0) {
@@ -35,7 +13,6 @@ String fromCString(Pointer<Char> cString) {
   return len > 0 ? ascii.decode(cString.asTypedList(len)) : '';
 }
 
-/// Don't forget to free the c string using the same allocator if your are done with it!
 Pointer<Char> toCString(String dartString, Allocator allocator) {
   List<int> bytes = ascii.encode(dartString);
   Pointer<Char> cString = allocator.allocate<Char>(bytes.length);
@@ -43,18 +20,47 @@ Pointer<Char> toCString(String dartString, Allocator allocator) {
   return cString;
 }
 
+Future<String> hello<T>(String name) async {
+  Module? module;
+  if (T == StandaloneWasmModule) {
+    // Load the WebAssembly binary from assets
+    String path = 'assets/standalone.wasm';
+    Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
+
+    // After we loaded the wasm binaries, we obtain a module
+    module = await StandaloneWasmModule.compile(wasmBinaries, "WasmFfi");
+  } else {
+    await importLibrary('assets/emscripten.js');
+
+    // Load the WebAssembly binaries from assets
+    String path = 'assets/emscripten.wasm';
+    Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
+
+    // After we loaded the wasm binaries and injected the js code
+    // into our webpage, we obtain a module
+    module = await EmscriptenModule.compile(wasmBinaries, "WasmFfi");
+  }
+
+  DynamicLibrary library = module.getLibrary();
+  WasmBindings bindings = WasmBindings(library);
+
+  String result = "";
+  using((Arena arena) {
+    Pointer<Char> cString = toCString(name, arena);
+    result = fromCString(bindings.hello(cString));
+
+    bindings.freeMemory(cString);
+  }, library.boundMemory);
+
+  return result;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Module standaloneModule = await initStandalone();
-  WasmBindings standaloneBindings =
-      WasmBindings(standaloneModule.getLibrary(MemoryRegisterMode.yes));
+
   String standaloneResult =
-      fromCString(standaloneBindings.hello(toCString("world", Arena())));
-  Module emscriptenModule = await initEmscripten();
-  WasmBindings emscriptenBindings =
-      WasmBindings(emscriptenModule.getLibrary(MemoryRegisterMode.yes));
-  String emscriptenResult =
-      fromCString(emscriptenBindings.hello(toCString("world", Arena())));
+      await hello<StandaloneWasmModule>("standalone world");
+  String emscriptenResult = await hello<EmscriptenModule>("js world");
 
   runApp(MyApp(standaloneResult, emscriptenResult, key: UniqueKey()));
 }
