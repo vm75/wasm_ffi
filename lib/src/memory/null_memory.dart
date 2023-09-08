@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import '../ffi/types.dart';
+import '../types/types.dart';
 import 'memory.dart';
 
 class NullMemory implements Memory {

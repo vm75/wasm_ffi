@@ -1,11 +1,11 @@
 import 'package:meta/meta.dart';
 
-import '../ffi/types.dart';
-import '../ffi/utf8.dart';
+import '../memory/memory.dart';
 import '../modules/exceptions.dart';
-import '../modules/memory.dart';
 import 'invoker_generated.dart';
 import 'type_utils.dart';
+import 'types.dart';
+import 'utf8.dart';
 
 // Called from the invokers
 T execute<T>(Function base, List<Object> args, Memory memory) {
@@ -68,28 +68,30 @@ final Map<String, InvokeHelper> _knownTypes = {
 };
 
 final Map<String, Function> _knownTypes2 = {
-  typeString<int>():  (o, b) => _toDartType<int>(o, b),
-  typeString<double>():  (o, b) => _toDartType<double>(o, b),
-  typeString<bool>():  (o, b) => _toDartType<bool>(o, b),
-  typeString<void>():  (o, b) => _toDartType<void>(o, b),
+  typeString<int>(): (o, b) => _toDartType<int>(o, b),
+  typeString<double>(): (o, b) => _toDartType<double>(o, b),
+  typeString<bool>(): (o, b) => _toDartType<bool>(o, b),
+  typeString<void>(): (o, b) => _toDartType<void>(o, b),
 };
 
 void registerNativeMarshallerType<T extends NativeType>() {
   _knownTypes[typeString<Pointer<T>>()] = InvokeHelper<Pointer<T>>(null, null);
   _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       InvokeHelper<Pointer<Pointer<T>>>(null, null);
-  _knownTypes2[typeString<Pointer<T>>()] =  (o, b) => _toDartType<Pointer<T>>(o, b);
+  _knownTypes2[typeString<Pointer<T>>()] =
+      (o, b) => _toDartType<Pointer<T>>(o, b);
   _knownTypes2[typeString<Pointer<Pointer<T>>>()] =
-       (o, b) => _toDartType<Pointer<Pointer<T>>>(o, b);
+      (o, b) => _toDartType<Pointer<Pointer<T>>>(o, b);
 }
 
 void registerNativeMarshallerOpaque<T extends Opaque>() {
   _knownTypes[typeString<Pointer<T>>()] = OpaqueInvokeHelper<T>(null, null);
   _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       OpaqueInvokeHelperSquare<T>(null, null);
-  _knownTypes2[typeString<Pointer<T>>()] =  (o, b) => _toDartType<Pointer<Opaque>>(o, b).cast<T>();
+  _knownTypes2[typeString<Pointer<T>>()] =
+      (o, b) => _toDartType<Pointer<Opaque>>(o, b).cast<T>();
   _knownTypes2[typeString<Pointer<Pointer<T>>>()] =
-       (o, b) => _toDartType<Pointer<Pointer<Opaque>>>(o, b).cast<Pointer<T>>();
+      (o, b) => _toDartType<Pointer<Pointer<Opaque>>>(o, b).cast<Pointer<T>>();
 }
 
 Function marshaller(String typeName) => _knownTypes2[typeName]!;

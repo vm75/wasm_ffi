@@ -6,6 +6,14 @@ class Extra {
 /// but not in `dart:ffi`.
 const Extra extra = Extra();
 
+class Different {
+  const Different();
+}
+
+/// A class, field or method annotated with different is present in `wasm_ffi`,
+/// but behavior is different from that of `dart:ffi`.
+const Different different = Different();
+
 class NoGeneric {
   const NoGeneric();
 }

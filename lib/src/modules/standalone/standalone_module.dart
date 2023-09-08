@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:js/js_util.dart';
 import 'package:wasm_interop/wasm_interop.dart' as interop;
-import '../../../wasm_ffi_meta.dart';
+import '../../annotations.dart';
 import '../module.dart';
 
 @extra
@@ -12,17 +12,9 @@ class StandaloneWasmModule extends Module {
   @override
   List<WasmSymbol> get exports => _exports;
 
-  /// map of instances by their name
-  static final Map<String, StandaloneWasmModule> _instances = {};
-
-  static Future<StandaloneWasmModule> compile(
-      Uint8List wasmBinary, String moduleName) async {
-    if (_instances.containsKey(moduleName)) {
-      return _instances[moduleName]!;
-    }
+  static Future<StandaloneWasmModule> compile(Uint8List wasmBinary) async {
     final wasmInstance = await interop.Instance.fromBytesAsync(wasmBinary);
-    _instances[moduleName] = StandaloneWasmModule._(wasmInstance);
-    return _instances[moduleName]!;
+    return StandaloneWasmModule._(wasmInstance);
   }
 
   FunctionDescription _fromWasmFunction(String name, Function func, int index) {

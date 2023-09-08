@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:wasm_ffi/proxy_ffi.dart';
+import 'package:wasm_ffi/ffi_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:inject_js/inject_js.dart';
 import 'src/wasm_bindings.dart';
 
 String fromCString(Pointer<Char> cString) {
@@ -20,28 +19,31 @@ Pointer<Char> toCString(String dartString, Allocator allocator) {
   return cString;
 }
 
-Future<String> hello<T>(String name) async {
-  Module? module;
-  if (T == StandaloneWasmModule) {
+Future<String> testHello(String name, bool standalone) async {
+  DynamicLibrary? library;
+  if (standalone) {
     // Load the WebAssembly binary from assets
     String path = 'assets/standalone.wasm';
-    Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
-
-    // After we loaded the wasm binaries, we obtain a module
-    module = await StandaloneWasmModule.compile(wasmBinaries, "WasmFfi");
+    Uint8List wasmBinary = (await rootBundle.load(path)).buffer.asUint8List();
+    library = await DynamicLibrary.open(
+      WasmType.standalone,
+      wasmBinary: wasmBinary,
+    );
   } else {
-    await importLibrary('assets/emscripten.js');
-
     // Load the WebAssembly binaries from assets
     String path = 'assets/emscripten.wasm';
-    Uint8List wasmBinaries = (await rootBundle.load(path)).buffer.asUint8List();
+    Uint8List wasmBinary = (await rootBundle.load(path)).buffer.asUint8List();
 
     // After we loaded the wasm binaries and injected the js code
     // into our webpage, we obtain a module
-    module = await EmscriptenModule.compile(wasmBinaries, "WasmFfi");
+    library = await DynamicLibrary.open(
+      WasmType.withJs,
+      moduleName: "WasmFfi",
+      wasmBinary: wasmBinary,
+      jsModule: 'assets/emscripten.js',
+    );
   }
 
-  DynamicLibrary library = module.getLibrary();
   WasmBindings bindings = WasmBindings(library);
 
   String result = "";
@@ -58,9 +60,8 @@ Future<String> hello<T>(String name) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  String standaloneResult =
-      await hello<StandaloneWasmModule>("standalone world");
-  String emscriptenResult = await hello<EmscriptenModule>("js world");
+  String standaloneResult = await testHello("standalone world", true);
+  String emscriptenResult = await testHello("js world", false);
 
   runApp(MyApp(standaloneResult, emscriptenResult, key: UniqueKey()));
 }

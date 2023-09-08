@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import '../../../wasm_ffi_meta.dart';
+import '../../annotations.dart';
 import '../module.dart';
 
 @extra

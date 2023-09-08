@@ -103,7 +103,7 @@ packages:
     source: hosted
     version: "2.1.2"
   inject_js:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: inject_js
       sha256: "3ab213e2c76375a611f57eb0044d32c6e18c5091d52510e7fe9f88f6bee83d19"

@@ -4,7 +4,7 @@ library emscripten_module;
 import 'dart:typed_data';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
-import '../../../wasm_ffi_meta.dart';
+import '../../annotations.dart';
 import '../module.dart';
 
 @JS('globalThis')
@@ -24,7 +24,7 @@ class _EmscriptenModuleJs {
   external Object? get wasmExports; // Emscripten >=3.1.44
 
   // Must have an unnamed factory constructor with named arguments.
-  external factory _EmscriptenModuleJs({Uint8List wasmBinary});
+  external factory _EmscriptenModuleJs({Uint8List? wasmBinary});
 }
 
 const String _github = r'https://github.com/vm75/wasm_ffi';
@@ -72,21 +72,8 @@ class EmscriptenModule extends Module {
   }
 
   /// Documentation is in `emscripten_module_stub.dart`!
-  static Future<EmscriptenModule> process(String moduleName) async {
-    Function moduleFunction = _moduleFunction(moduleName);
-    _EmscriptenModuleJs module = _EmscriptenModuleJs();
-    Object? o = moduleFunction(module);
-    if (o != null) {
-      await promiseToFuture(o);
-      return EmscriptenModule._fromJs(module);
-    } else {
-      throw StateError('Could not instantiate an emscripten module!');
-    }
-  }
-
-  /// Documentation is in `emscripten_module_stub.dart`!
   static Future<EmscriptenModule> compile(
-      Uint8List wasmBinary, String moduleName) async {
+      String moduleName, Uint8List? wasmBinary) async {
     Function moduleFunction = _moduleFunction(moduleName);
     _EmscriptenModuleJs module = _EmscriptenModuleJs(wasmBinary: wasmBinary);
     Object? o = moduleFunction(module);

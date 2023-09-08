@@ -1,8 +1,8 @@
 import 'dart:typed_data';
-import '../../wasm_ffi_meta.dart';
-import '../internal/marshaller.dart';
-import '../modules/memory.dart';
+import '../annotations.dart';
+import '../memory/memory.dart';
 import '../modules/module.dart';
+import 'marshaller.dart';
 import 'types.dart';
 
 /// Extension on [Pointer] specialized for the type argument [NativeFunction].
@@ -25,15 +25,6 @@ extension NativeFunctionPointer<NF extends Function>
           'No function at address $address was found (but a global symbol)!');
     }
   }
-}
-
-extension DynamicLibraryExtension on DynamicLibrary {
-  /// Helper that combines lookup and cast to a Dart function.
-  ///
-  /// This simply calles [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
-  /// internally, so see this two methods for additional insights.
-  F lookupFunction<T extends Function, F extends Function>(String name) =>
-      lookup<NativeFunction<T>>(name).asFunction<F>();
 }
 
 /// Extension on [Allocator] to provide allocation with [NativeType].

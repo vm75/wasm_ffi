@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
-import '../../wasm_ffi_meta.dart';
-import '../internal/type_utils.dart';
-import '../modules/memory.dart';
-import '../modules/module.dart';
-import '../modules/null_memory.dart';
+import '../annotations.dart';
+import '../memory/memory.dart';
+import '../memory/null_memory.dart';
+import 'type_utils.dart';
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
 /// e.g. a pointer with address 0.
@@ -285,64 +284,6 @@ class Pointer<T extends NativeType> extends NativeType {
       return boundMemory.buffer.asByteData(address + index * s, s);
     } else {
       throw UnsupportedError('viewSingle is not supported for unsized types!');
-    }
-  }
-}
-
-/// Represents a dynamically loaded C library.
-class DynamicLibrary {
-  @extra
-  final Memory boundMemory;
-
-  /// Creates a instance based on the given module.
-  ///
-  /// While for each [DynamicLibrary] a [Memory] object is
-  /// created, the [Memory] objects share the backing memory if
-  /// they are created based on the same module.
-  ///
-  /// The [registerMode] parameter can be used to control if the
-  /// newly created [Memory] object should be registered as
-  /// [Memory.global].
-  @extra
-  factory DynamicLibrary.fromModule(Module module,
-      [MemoryRegisterMode registerMode =
-          MemoryRegisterMode.onlyIfGlobalNotSet]) {
-    Memory memory = createMemory(module);
-    switch (registerMode) {
-      case MemoryRegisterMode.yes:
-        Memory.global = memory;
-        break;
-      case MemoryRegisterMode.no:
-        break;
-      case MemoryRegisterMode.onlyIfGlobalNotSet:
-        Memory.global ??= memory;
-        break;
-    }
-    return DynamicLibrary._(memory);
-  }
-
-  factory DynamicLibrary.open(String path) => throw UnimplementedError();
-
-  DynamicLibrary._(this.boundMemory);
-
-  /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
-  ///
-  /// Throws an [ArgumentError] if it fails to lookup the symbol.
-  ///
-  /// While this method checks if the underyling wasm symbol is a actually
-  /// a function when you lookup a [NativeFunction]`<T>`, it does not check if
-  /// the return type and parameters of `T` match the wasm function.
-  Pointer<T> lookup<T extends NativeType>(String name) {
-    WasmSymbol symbol = symbolByName(boundMemory, name);
-    if (isNativeFunctionType<T>()) {
-      if (symbol is FunctionDescription) {
-        return Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
-      } else {
-        throw ArgumentError(
-            'Tried to look up $name as a function, but it seems it is NOT a function!');
-      }
-    } else {
-      return Pointer<T>.fromAddress(symbol.address, boundMemory);
     }
   }
 }

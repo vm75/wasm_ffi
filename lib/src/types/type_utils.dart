@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
-import '../ffi/types.dart';
-import '../ffi/utf8.dart';
+import 'types.dart';
+import 'utf8.dart';
 
 /// Hacky workadround, see https://github.com/dart-lang/language/issues/123
 Type _extractType<T>() => T;
@@ -38,7 +38,8 @@ final Type Pointer_Pointer_Int16 = _extractType<Pointer<Pointer<Int16>>>();
 final Type Pointer_Pointer_Int32 = _extractType<Pointer<Pointer<Int32>>>();
 final Type Pointer_Pointer_Int64 = _extractType<Pointer<Pointer<Int64>>>();
 final Type Pointer_Pointer_Double = _extractType<Pointer<Pointer<Double>>>();
-final Type Pointer_Pointer_UnsignedInt = _extractType<Pointer<Pointer<UnsignedInt>>>();
+final Type Pointer_Pointer_UnsignedInt =
+    _extractType<Pointer<Pointer<UnsignedInt>>>();
 final Type Pointer_Pointer_Uint8 = _extractType<Pointer<Pointer<Uint8>>>();
 final Type Pointer_Pointer_Uint16 = _extractType<Pointer<Pointer<Uint16>>>();
 final Type Pointer_Pointer_Uint32 = _extractType<Pointer<Pointer<Uint32>>>();

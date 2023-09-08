@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import '../../../wasm_ffi_meta.dart';
+import '../../annotations.dart';
 import '../module.dart';
 
 /// Provides access to WebAssembly compiled with [emscripten](https://emscripten.org).
@@ -23,23 +23,12 @@ import '../module.dart';
 class EmscriptenModule extends Module {
   /// Connects to the JavaScript glue of the emscripten module.
   ///
-  /// This happens in the following way:
   /// First, a JavaScript property named `moduleName` of the global object
   /// is accessed, which should contain a function. Then this function is
   /// called and expected to return a JavaScript emscripten module.
   ///
   /// The JavaScript emscripten module is responsible for retriving the
-  /// WebAssembly and compile it accordingly.
-  ///
-  /// On platforms where [dart:js](https://api.dart.dev/stable/dart-js/dart-js-library.html)
-  /// is not available, an [UnsupportedError] is thrown.
-  static Future<EmscriptenModule> process(String moduleName) =>
-      throw UnsupportedError(
-          'Emscripten operations are only allowed on the web (where dart:js is present)!');
-
-  /// Connects to the JavaScript glue of the emscripten module.
-  ///
-  /// Works like [process], except that the bytes of the WebAssembly
+  /// WebAssembly and compile it accordingly. The bytes of the WebAssembly
   /// are passed to the JavaScript emscripten module, so it is
   /// your responsibility to fetch it.
   ///

@@ -2,8 +2,8 @@
 /// While some things are missing, new things were added, identifiable by the @[extra] annotation.
 library wasm_ffi;
 
-export 'src/ffi/arena.dart';
-export 'src/ffi/extensions.dart';
-export 'src/ffi/types.dart';
-export 'src/ffi/utf8.dart';
-export 'wasm_ffi_modules.dart';
+export 'dynamic_library.dart';
+export 'src/memory/arena.dart';
+export 'src/types/extensions.dart';
+export 'src/types/types.dart';
+export 'src/types/utf8.dart';

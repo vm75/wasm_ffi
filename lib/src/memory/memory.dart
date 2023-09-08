@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
-import '../../wasm_ffi_meta.dart';
-import '../ffi/types.dart';
-import '../ffi/utf8.dart';
-import '../internal/marshaller.dart';
-import 'module.dart';
+import '../../dynamic_library.dart';
+import '../annotations.dart';
+import '../modules/module.dart';
+import '../types/marshaller.dart';
+import '../types/types.dart';
+import '../types/utf8.dart';
 
 final Map<Type, int> sizeMap = {};
 
@@ -122,4 +123,4 @@ WasmSymbol symbolByName(Memory m, String name) {
 /// Used on [DynamicLibrary] creation to control if the therby newly created
 /// [Memory] object should be registered as [Memory.global].
 @extra
-enum MemoryRegisterMode { yes, no, onlyIfGlobalNotSet }
+enum GlobalMemory { yes, no, ifNotSet }
