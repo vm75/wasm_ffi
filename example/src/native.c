@@ -4,7 +4,7 @@
 #include <string.h>
 
 /// hello world
-char* CALL_CONV hello(const char* text)
+char* hello(const char* text)
 {
     char* buffer = (char*)malloc(strlen(text) + 8);
     sprintf(buffer, "Hello %s!", text);
@@ -12,7 +12,7 @@ char* CALL_CONV hello(const char* text)
 }
 
 /// freeMemory
-void CALL_CONV freeMemory(char* buffer)
+void freeMemory(char* buffer)
 {
     if (buffer) {
         free(buffer);
