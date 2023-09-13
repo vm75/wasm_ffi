@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'extensions.dart';
 import 'types.dart';
@@ -12,7 +13,7 @@ import 'types.dart';
 /// The Utf8 type itself has no functionality, it's only intended to be used
 /// through a `Pointer<Utf8>` representing the entire array. This pointer is
 /// the equivalent of a char pointer (`const char*`) in C code.
-class Utf8 extends Opaque {}
+class Utf8 extends Uint8 {}
 
 /// Extension method for converting a`Pointer<Utf8>` to a [String].
 extension Utf8Pointer on Pointer<Utf8> {
@@ -71,18 +72,22 @@ extension StringUtf8Pointer on String {
   /// If this [String] contains NUL characters, converting it back to a string
   /// using [Utf8Pointer.toDartString] will truncate the result if a length is
   /// not passed.
+  /// Optionally, a [size] can be passed to specify the size of the allocated
+  /// array. If [size] is not provided, the array is sized to fit the string.
   ///
   /// Unpaired surrogate code points in this [String] will be encoded as
   /// replacement characters (U+FFFD, encoded as the bytes 0xEF 0xBF 0xBD) in
   /// the UTF-8 encoded result. See [Utf8Encoder] for details on encoding.
   ///
   /// Returns an [allocator]-allocated pointer to the result.
-  Pointer<Utf8> toNativeUtf8({required Allocator allocator}) {
+  Pointer<T> toNativeUtf8<T extends Uint8>(Allocator allocator, [int? size]) {
     final units = utf8.encode(this);
-    final Pointer<Uint8> result = allocator<Uint8>(units.length + 1);
-    final Uint8List nativeString = result.asTypedList(units.length + 1);
-    nativeString.setAll(0, units);
-    nativeString[units.length] = 0;
+    size ??= units.length + 1;
+    final Pointer<Uint8> result = allocator<Uint8>(size);
+    final Uint8List nativeString = result.asTypedList(size);
+    final int lengthToCopy = min(size - 1, units.length);
+    nativeString.setRange(0, lengthToCopy, units);
+    nativeString[lengthToCopy - 1] = 0;
     return result.cast();
   }
 }

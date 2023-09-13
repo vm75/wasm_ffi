@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:wasm_ffi/ffi_proxy.dart';
+import 'package:wasm_ffi/ffi_utils_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'src/wasm_bindings.dart';

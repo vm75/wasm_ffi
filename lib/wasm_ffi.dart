@@ -3,7 +3,5 @@
 library wasm_ffi;
 
 export 'dynamic_library.dart';
-export 'src/memory/arena.dart';
 export 'src/types/extensions.dart';
 export 'src/types/types.dart';
-export 'src/types/utf8.dart';

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
+import '../../wasm_ffi.dart';
 import '../annotations.dart';
+import '../memory/memory.dart';
 
 /// Base class to interact with the WebAssembly.
 ///
@@ -36,6 +38,22 @@ abstract class Module {
   /// A list containing everything exported by the underlying
   /// [WebAssembly instance](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Instance).
   List<WasmSymbol> get exports;
+
+  /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
+  ///
+  /// Throws an [ArgumentError] if it fails to lookup the symbol.
+  ///
+  /// While this method checks if the underyling wasm symbol is a actually
+  /// a function when you lookup a [NativeFunction]`<T>`, it does not check if
+  /// the return type and parameters of `T` match the wasm function.
+  Pointer<T> lookup<T extends NativeType>(String name, Memory memory);
+
+  /// Checks whether this dynamic library provides a symbol with the given
+  /// name.
+  bool providesSymbol(String symbolName);
+
+  F lookupFunction<T extends Function, F extends Function>(
+      String name, Memory memory);
 }
 
 /// Describes something exported by the WebAssembly.

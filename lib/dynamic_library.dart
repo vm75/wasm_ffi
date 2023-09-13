@@ -7,8 +7,6 @@ import 'src/memory/memory.dart';
 import 'src/modules/emscripten/emscripten_module.dart';
 import 'src/modules/module.dart';
 import 'src/modules/standalone/standalone_module.dart';
-import 'src/types/extensions.dart';
-import 'src/types/type_utils.dart';
 import 'src/types/types.dart';
 
 /// Enum for StandaloneWasmModule and EmscriptenModule
@@ -25,7 +23,10 @@ class DynamicLibrary {
   @extra
   final Memory boundMemory;
 
-  DynamicLibrary._(this.boundMemory);
+  @extra
+  Module module;
+
+  DynamicLibrary._(this.module, this.boundMemory);
 
   /// Creates a instance based on the given module.
   ///
@@ -96,7 +97,7 @@ class DynamicLibrary {
         break;
     }
 
-    return DynamicLibrary._(memory);
+    return DynamicLibrary._(module, memory);
   }
 
   /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
@@ -106,23 +107,12 @@ class DynamicLibrary {
   /// While this method checks if the underyling wasm symbol is a actually
   /// a function when you lookup a [NativeFunction]`<T>`, it does not check if
   /// the return type and parameters of `T` match the wasm function.
-  Pointer<T> lookup<T extends NativeType>(String name) {
-    WasmSymbol symbol = symbolByName(boundMemory, name);
-    if (isNativeFunctionType<T>()) {
-      if (symbol is FunctionDescription) {
-        return Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
-      } else {
-        throw ArgumentError(
-            'Tried to look up $name as a function, but it seems it is NOT a function!');
-      }
-    } else {
-      return Pointer<T>.fromAddress(symbol.address, boundMemory);
-    }
-  }
+  Pointer<T> lookup<T extends NativeType>(String name) =>
+      module.lookup(name, boundMemory);
 
   /// Checks whether this dynamic library provides a symbol with the given
   /// name.
-  bool providesSymbol(String symbolName) => throw UnimplementedError();
+  bool providesSymbol(String symbolName) => module.providesSymbol(symbolName);
 
   /// Closes this dynamic library.
   ///
@@ -135,13 +125,11 @@ class DynamicLibrary {
   /// pointers and functions previously returned by [lookup] and
   /// [DynamicLibraryExtension.lookupFunction] may become invalid as well.
   void close() => throw UnimplementedError();
-}
 
-extension DynamicLibraryExtension on DynamicLibrary {
   /// Helper that combines lookup and cast to a Dart function.
   ///
   /// This simply calls [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
   /// internally, so see this two methods for additional insights.
   F lookupFunction<T extends Function, F extends Function>(String name) =>
-      lookup<NativeFunction<T>>(name).asFunction<F>();
+      module.lookupFunction(name, boundMemory);
 }
