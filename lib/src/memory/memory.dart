@@ -6,6 +6,7 @@ import '../modules/module.dart';
 import '../types/marshaller.dart';
 import '../types/types.dart';
 import '../types/utf8.dart';
+import 'allocation.dart';
 
 final Map<Type, int> sizeMap = {};
 

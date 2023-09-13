@@ -20,13 +20,18 @@ enum WasmType {
 
 /// Represents a dynamically loaded C library.
 class DynamicLibrary {
-  @extra
-  final Memory boundMemory;
+  final Module _module;
+  final Memory _memory;
 
+  /// Access the module object
   @extra
-  Module module;
+  Module get module => _module;
 
-  DynamicLibrary._(this.module, this.boundMemory);
+  /// Access the memory bound to this library
+  @extra
+  Memory get memory => _memory;
+
+  DynamicLibrary._(this._module, this._memory);
 
   /// Creates a instance based on the given module.
   ///
@@ -108,11 +113,11 @@ class DynamicLibrary {
   /// a function when you lookup a [NativeFunction]`<T>`, it does not check if
   /// the return type and parameters of `T` match the wasm function.
   Pointer<T> lookup<T extends NativeType>(String name) =>
-      module.lookup(name, boundMemory);
+      _module.lookup(name, _memory);
 
   /// Checks whether this dynamic library provides a symbol with the given
   /// name.
-  bool providesSymbol(String symbolName) => module.providesSymbol(symbolName);
+  bool providesSymbol(String symbolName) => _module.providesSymbol(symbolName);
 
   /// Closes this dynamic library.
   ///
@@ -131,5 +136,5 @@ class DynamicLibrary {
   /// This simply calls [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
   /// internally, so see this two methods for additional insights.
   F lookupFunction<T extends Function, F extends Function>(String name) =>
-      module.lookupFunction(name, boundMemory);
+      _module.lookupFunction(name, _memory);
 }

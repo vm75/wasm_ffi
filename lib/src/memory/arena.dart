@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../types/types.dart';
+import 'allocation.dart';
 import 'memory.dart';
 
 R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {

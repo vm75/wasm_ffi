@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import '../annotations.dart';
+import '../memory/allocation.dart';
 import '../memory/memory.dart';
 import '../modules/module.dart';
 import 'marshaller.dart';

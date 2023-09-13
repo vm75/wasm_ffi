@@ -202,6 +202,9 @@ class Void extends NativeType {}
 @notConstructible
 class Char extends Int8 {}
 
+typedef UnsignedLong = Uint64;
+typedef Size = Uint32;
+
 /// Represents a pointer into the native C memory. Cannot be extended.
 @sealed
 class Pointer<T extends NativeType> extends NativeType {
@@ -286,15 +289,4 @@ class Pointer<T extends NativeType> extends NativeType {
       throw UnsupportedError('viewSingle is not supported for unsized types!');
     }
   }
-}
-
-/// Manages memory on the native heap.
-abstract class Allocator {
-  /// Allocates byteCount bytes of memory on the native heap.
-  ///
-  /// The parameter `alignment` is ignored.
-  Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment});
-
-  /// Releases memory allocated on the native heap.
-  void free(Pointer<NativeType> pointer);
 }

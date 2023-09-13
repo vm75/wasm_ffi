@@ -3,5 +3,6 @@
 library wasm_ffi;
 
 export 'dynamic_library.dart';
+export 'src/memory/allocation.dart';
 export 'src/types/extensions.dart';
 export 'src/types/types.dart';
