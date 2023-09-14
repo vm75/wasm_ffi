@@ -4,8 +4,8 @@ import '../../dynamic_library.dart';
 import '../annotations.dart';
 import '../modules/module.dart';
 import '../types/marshaller.dart';
+import '../types/string.dart';
 import '../types/types.dart';
-import '../types/utf8.dart';
 import 'allocation.dart';
 
 final Map<Type, int> sizeMap = {};

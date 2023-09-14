@@ -3,9 +3,9 @@ import 'package:meta/meta.dart';
 import '../memory/memory.dart';
 import '../modules/exceptions.dart';
 import 'invoker_generated.dart';
+import 'string.dart';
 import 'type_utils.dart';
 import 'types.dart';
-import 'utf8.dart';
 
 // Called from the invokers
 T execute<T>(Function base, List<Object> args, Memory memory) {

@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'string.dart';
 import 'types.dart';
-import 'utf8.dart';
 
 /// Hacky workadround, see https://github.com/dart-lang/language/issues/123
 Type _extractType<T>() => T;

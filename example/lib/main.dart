@@ -1,23 +1,7 @@
-import 'dart:convert';
 import 'package:wasm_ffi/ffi_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'src/wasm_bindings.dart';
-
-String fromCString(Pointer<Char> cString) {
-  int len = 0;
-  while (cString[len] != 0) {
-    len++;
-  }
-  return len > 0 ? ascii.decode(cString.asTypedList(len)) : '';
-}
-
-Pointer<Char> toCString(String dartString, Allocator allocator) {
-  List<int> bytes = ascii.encode(dartString);
-  Pointer<Char> cString = allocator.allocate<Char>(bytes.length);
-  cString.asTypedList(bytes.length).setAll(0, bytes);
-  return cString;
-}
+import 'wasm_bindings.dart';
 
 Future<String> testHello(String name, bool standalone) async {
   DynamicLibrary? library;
@@ -46,15 +30,10 @@ Future<String> testHello(String name, bool standalone) async {
 
   WasmBindings bindings = WasmBindings(library);
 
-  String result = "";
-  using((Arena arena) {
-    Pointer<Char> cString = toCString(name, arena);
-    result = fromCString(bindings.hello(cString));
-
-    bindings.freeMemory(cString);
+  return using((Arena arena) {
+    Pointer<Char> cString = name.toNativeUtf8(arena);
+    return bindings.hello(cString).toDartString();
   }, library.memory);
-
-  return result;
 }
 
 Future<void> main() async {
