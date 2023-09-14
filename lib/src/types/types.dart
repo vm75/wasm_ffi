@@ -202,7 +202,17 @@ class Void extends NativeType {}
 @notConstructible
 class Char extends Int8 {}
 
-typedef UnsignedLong = Uint64;
+/// Miscellaneous types, defined as alias
+typedef SignedInt = Int32;
+typedef SignedChar = Int8;
+typedef UnsignedChar = Uint8;
+typedef Short = Int16;
+typedef UnsignedShort = Uint16;
+typedef Long = Int32;
+typedef UnsignedLong = Uint32;
+typedef LongLong = Int64;
+typedef UnsignedLongLong = Uint64;
+typedef WChar = Int32;
 typedef Size = Uint32;
 
 /// Represents a pointer into the native C memory. Cannot be extended.

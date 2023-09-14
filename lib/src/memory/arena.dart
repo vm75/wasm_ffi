@@ -4,23 +4,6 @@ import '../types/types.dart';
 import 'allocation.dart';
 import 'memory.dart';
 
-R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {
-  final arena = Arena(wrappedAllocator ?? Memory.global!);
-  bool isAsync = false;
-  try {
-    final result = computation(arena);
-    if (result is Future) {
-      isAsync = true;
-      return result.whenComplete(arena.releaseAll) as R;
-    }
-    return result;
-  } finally {
-    if (!isAsync) {
-      arena.releaseAll();
-    }
-  }
-}
-
 /// An [Allocator] which frees all allocations at the same time.
 ///
 /// The arena allows you to allocate heap memory, but ignores calls to [free].
@@ -119,4 +102,78 @@ class Arena implements Allocator {
           'Arena no longer in use, `releaseAll(reuse: false)` was called.');
     }
   }
+}
+
+/// Runs [computation] with a new [Arena], and releases all allocations at the
+/// end.
+///
+/// If the return value of [computation] is a [Future], all allocations are
+/// released when the future completes.
+///
+/// If the isolate is shut down, through `Isolate.kill()`, resources are _not_
+/// cleaned up.
+R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {
+  final arena = Arena(wrappedAllocator ?? Memory.global!);
+  bool isAsync = false;
+  try {
+    final result = computation(arena);
+    if (result is Future) {
+      isAsync = true;
+      return result.whenComplete(arena.releaseAll) as R;
+    }
+    return result;
+  } finally {
+    if (!isAsync) {
+      arena.releaseAll();
+    }
+  }
+}
+
+/// Creates a zoned [Arena] to manage native resources.
+///
+/// The arena is available through [zoneArena].
+///
+/// If the isolate is shut down, through `Isolate.kill()`, resources are _not_
+/// cleaned up.
+R withZoneArena<R>(R Function() computation, [Allocator? wrappedAllocator]) {
+  final arena = Arena(wrappedAllocator ?? Memory.global!);
+  var arenaHolder = [arena];
+  bool isAsync = false;
+  try {
+    return runZoned(() {
+      final result = computation();
+      if (result is Future) {
+        isAsync = true;
+        return result.whenComplete(() {
+          arena.releaseAll();
+        }) as R;
+      }
+      return result;
+    }, zoneValues: {#_arena: arenaHolder});
+  } finally {
+    if (!isAsync) {
+      arena.releaseAll();
+      arenaHolder.clear();
+    }
+  }
+}
+
+/// A zone-specific [Arena].
+///
+/// Asynchronous computations can share a [Arena]. Use [withZoneArena] to create
+/// a new zone with a fresh [Arena], and that arena will then be released
+/// automatically when the function passed to [withZoneArena] completes.
+/// All code inside that zone can use `zoneArena` to access the arena.
+///
+/// The current arena must not be accessed by code which is not running inside
+/// a zone created by [withZoneArena].
+Arena get zoneArena {
+  final arenaHolder = Zone.current[#_arena] as List<Arena>?;
+  if (arenaHolder == null) {
+    throw StateError('Not inside a zone created by `useArena`');
+  }
+  if (arenaHolder.isNotEmpty) {
+    return arenaHolder.single;
+  }
+  throw StateError('Arena has already been cleared with releaseAll.');
 }
