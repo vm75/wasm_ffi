@@ -1,5 +1,5 @@
-import '../memory/memory.dart';
 import 'marshaller.dart' show execute;
+import 'memory.dart';
 import 'types.dart';
 
 /// https://stackoverflow.com/questions/26122009/is-there-a-maximum-number-of-parameters-for-functions-in-c-with-the-gcc-resp-m

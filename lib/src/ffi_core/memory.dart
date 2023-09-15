@@ -1,12 +1,11 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
-import '../../dynamic_library.dart';
-import '../annotations.dart';
-import '../modules/module.dart';
-import '../types/marshaller.dart';
-import '../types/string.dart';
-import '../types/types.dart';
 import 'allocation.dart';
+import 'annotations.dart';
+import 'dynamic_library.dart';
+import 'marshaller.dart';
+import 'modules/module.dart';
+import 'types.dart';
 
 final Map<Type, int> sizeMap = {};
 
@@ -54,7 +53,6 @@ class Memory implements Allocator {
     _registerType<Uint32>(4);
     _registerType<Int64>(8);
     _registerType<Uint64>(8);
-    _registerType<Utf8>(1);
     _registerType<Char>(1);
     _registerType<IntPtr>(pointerSizeBytes);
     _registerType<Opaque>(pointerSizeBytes);

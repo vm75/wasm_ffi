@@ -4,10 +4,10 @@ library emscripten_module;
 import 'dart:typed_data';
 import 'package:js/js.dart';
 import 'package:js/js_util.dart';
-import '../../../wasm_ffi.dart';
+import '../../../../wasm_ffi_core.dart';
 import '../../annotations.dart';
-import '../../memory/memory.dart';
-import '../../types/type_utils.dart';
+import '../../memory.dart';
+import '../../type_utils.dart';
 import '../module.dart';
 
 @JS('globalThis')

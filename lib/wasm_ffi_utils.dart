@@ -1,5 +1,7 @@
 /// equivalient for package:ffi, but for wasm.
 library wasm_ffi;
 
-export 'src/memory/arena.dart';
-export 'src/types/string.dart';
+export 'src/ffi_utils/allocation.dart' show calloc, malloc;
+export 'src/ffi_utils/arena.dart';
+export 'src/ffi_utils/string.dart';
+export 'src/ffi_utils/utf16.dart';

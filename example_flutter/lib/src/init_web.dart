@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 // Notice that in this file, we import wasm_ffi and not proxy_ffi.dart
-import 'package:wasm_ffi/wasm_ffi.dart';
+import 'package:wasm_ffi/wasm_ffi_core.dart';
 
 // Note that if you use assets included in a package rather them the main app,
 // the _basePath would be different: 'packages/<package_name>/assets'

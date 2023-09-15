@@ -1,9 +1,8 @@
 import 'dart:typed_data';
-import '../annotations.dart';
-import '../memory/allocation.dart';
-import '../memory/memory.dart';
-import '../modules/module.dart';
+import 'annotations.dart';
 import 'marshaller.dart';
+import 'memory.dart';
+import 'modules/module.dart';
 import 'types.dart';
 
 /// Extension on [Pointer] specialized for the type argument [NativeFunction].
@@ -26,16 +25,6 @@ extension NativeFunctionPointer<NF extends Function>
           'No function at address $address was found (but a global symbol)!');
     }
   }
-}
-
-/// Extension on [Allocator] to provide allocation with [NativeType].
-extension AllocatorAlloc on Allocator {
-  /// Allocates `sizeOf<T>() * count` bytes of memory using [Allocator.allocate].
-  ///
-  /// Since this calls [sizeOf<T>] internally, an exception will be thrown if this
-  /// method is called with an @[unsized] type or before [Memory.init] was called.
-  Pointer<T> call<T extends NativeType>([int count = 1]) =>
-      allocate(sizeOf<T>() * count);
 }
 
 /// Extension on [Pointer] specialized for the type argument [Float].

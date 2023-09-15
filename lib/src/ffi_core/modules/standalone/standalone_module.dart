@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 import 'package:js/js_util.dart';
 import 'package:wasm_interop/wasm_interop.dart' as interop;
-import '../../../wasm_ffi.dart';
+import '../../../../wasm_ffi_core.dart';
 import '../../annotations.dart';
-import '../../memory/memory.dart';
-import '../../types/type_utils.dart';
+import '../../memory.dart';
+import '../../type_utils.dart';
 import '../module.dart';
 
 @extra

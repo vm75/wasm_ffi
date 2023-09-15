@@ -1,6 +1,7 @@
 import 'dart:typed_data';
-import '../types/types.dart';
+
 import 'memory.dart';
+import 'types.dart';
 
 class NullMemory implements Memory {
   @override

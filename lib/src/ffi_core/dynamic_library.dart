@@ -2,12 +2,12 @@ import 'dart:typed_data';
 
 import 'package:inject_js/inject_js.dart';
 
-import 'src/annotations.dart';
-import 'src/memory/memory.dart';
-import 'src/modules/emscripten/emscripten_module.dart';
-import 'src/modules/module.dart';
-import 'src/modules/standalone/standalone_module.dart';
-import 'src/types/types.dart';
+import 'annotations.dart';
+import 'memory.dart';
+import 'modules/emscripten/emscripten_module.dart';
+import 'modules/module.dart';
+import 'modules/standalone/standalone_module.dart';
+import 'types.dart';
 
 /// Enum for StandaloneWasmModule and EmscriptenModule
 enum WasmType {

@@ -2,7 +2,8 @@
 /// While some things are missing, new things were added, identifiable by the @[extra] annotation.
 library wasm_ffi;
 
-export 'dynamic_library.dart';
-export 'src/memory/allocation.dart';
-export 'src/types/extensions.dart';
-export 'src/types/types.dart';
+export 'src/ffi_core/allocation.dart';
+export 'src/ffi_core/dynamic_library.dart';
+export 'src/ffi_core/extensions.dart';
+export 'src/ffi_core/native_finalizer.dart';
+export 'src/ffi_core/types.dart';

@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
-import '../annotations.dart';
-import '../memory/memory.dart';
-import '../memory/null_memory.dart';
+import 'annotations.dart';
+import 'memory.dart';
+import 'null_memory.dart';
 import 'type_utils.dart';
 
 /// Represents a pointer into the native C memory corresponding to "NULL",

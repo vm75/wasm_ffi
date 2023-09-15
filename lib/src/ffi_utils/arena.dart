@@ -1,8 +1,12 @@
-import 'dart:async';
+// Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+//
+// Explicit arena used for managing resources.
 
-import '../types/types.dart';
-import 'allocation.dart';
-import 'memory.dart';
+import 'dart:async';
+import '../../wasm_ffi_core.dart';
+import '../../wasm_ffi_utils.dart';
 
 /// An [Allocator] which frees all allocations at the same time.
 ///
@@ -32,8 +36,7 @@ class Arena implements Allocator {
   ///
   /// The [allocator] is used to do the actual allocation and freeing of
   /// memory. It defaults to using [calloc].
-  Arena([Allocator? allocator])
-      : _wrappedAllocator = allocator ?? Memory.global!;
+  Arena([Allocator allocator = calloc]) : _wrappedAllocator = allocator;
 
   /// Allocates memory and includes it in the arena.
   ///
@@ -112,14 +115,15 @@ class Arena implements Allocator {
 ///
 /// If the isolate is shut down, through `Isolate.kill()`, resources are _not_
 /// cleaned up.
-R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {
-  final arena = Arena(wrappedAllocator ?? Memory.global!);
+R using<R>(R Function(Arena) computation,
+    [Allocator wrappedAllocator = calloc]) {
+  final arena = Arena(wrappedAllocator);
   bool isAsync = false;
   try {
     final result = computation(arena);
     if (result is Future) {
       isAsync = true;
-      return result.whenComplete(arena.releaseAll) as R;
+      return (result.whenComplete(arena.releaseAll) as R);
     }
     return result;
   } finally {
@@ -135,8 +139,9 @@ R using<R>(R Function(Arena) computation, [Allocator? wrappedAllocator]) {
 ///
 /// If the isolate is shut down, through `Isolate.kill()`, resources are _not_
 /// cleaned up.
-R withZoneArena<R>(R Function() computation, [Allocator? wrappedAllocator]) {
-  final arena = Arena(wrappedAllocator ?? Memory.global!);
+R withZoneArena<R>(R Function() computation,
+    [Allocator wrappedAllocator = calloc]) {
+  final arena = Arena(wrappedAllocator);
   var arenaHolder = [arena];
   bool isAsync = false;
   try {
