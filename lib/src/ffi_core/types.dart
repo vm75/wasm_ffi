@@ -2,9 +2,12 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 
 import 'annotations.dart';
+import 'marshaller.dart';
 import 'memory.dart';
 import 'null_memory.dart';
 import 'type_utils.dart';
+
+export 'marshaller.dart' show sizeOf, initTypes;
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
 /// e.g. a pointer with address 0.
@@ -15,24 +18,6 @@ import 'type_utils.dart';
 /// Any other operation than comparing (e.g. calling [Pointer.cast])
 /// will result in exceptions.
 final Pointer<Never> nullptr = Pointer<Never>._null();
-
-/// Number of bytes used by native type T.
-///
-/// MUST NOT be called with types annoteted with @[unsized] or
-/// before [Memory.init()] was called or else an exception will be thrown.
-int sizeOf<T extends NativeType>() {
-  int? size;
-  if (isPointerType<T>()) {
-    size = sizeMap[IntPtr];
-  } else {
-    size = sizeMap[T];
-  }
-  if (size != null) {
-    return size;
-  } else {
-    throw ArgumentError('The type $T is not known!');
-  }
-}
 
 bool _isUnsizedType<T extends NativeType>() {
   return isNativeFunctionType<T>() || isVoidType<T>();
@@ -194,17 +179,17 @@ class Opaque extends NativeType {}
 @unsized
 class Void extends NativeType {}
 
-/// Represents a char type in C
+/// Represents a Size type in C.
 ///
-/// Char is not constructible in the Dart code and serves
-/// purely as a marker in type signatures
+/// Size is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Char extends Int8 {}
+@unsized
+class Size extends NativeType {}
 
 /// Miscellaneous types, defined as alias
-typedef SignedInt = Int32;
-typedef SignedChar = Int8;
+typedef Char = Int8;
 typedef UnsignedChar = Uint8;
 typedef Short = Int16;
 typedef UnsignedShort = Uint16;
@@ -213,7 +198,6 @@ typedef UnsignedLong = Uint32;
 typedef LongLong = Int64;
 typedef UnsignedLongLong = Uint64;
 typedef WChar = Int32;
-typedef Size = Uint32;
 
 /// Represents a pointer into the native C memory. Cannot be extended.
 @sealed

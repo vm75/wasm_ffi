@@ -18,6 +18,11 @@ enum WasmType {
   withJs
 }
 
+/// Used on [DynamicLibrary] creation to control if the therby newly created
+/// [Memory] object should be registered as [Memory.global].
+@extra
+enum GlobalMemory { yes, no, ifNotSet }
+
 /// Represents a dynamically loaded C library.
 class DynamicLibrary {
   final Module _module;
@@ -68,7 +73,8 @@ class DynamicLibrary {
     String? jsModule,
     GlobalMemory? useAsGlobal,
   }) async {
-    Memory.init();
+    /// Initialize the native types in marshaller
+    initTypes();
 
     Module? module;
     if (type == WasmType.withJs) {

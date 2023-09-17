@@ -3,62 +3,16 @@ import 'package:meta/meta.dart';
 import 'allocation.dart';
 import 'annotations.dart';
 import 'dynamic_library.dart';
-import 'marshaller.dart';
 import 'modules/module.dart';
 import 'types.dart';
-
-final Map<Type, int> sizeMap = {};
-
-/// Must be called with each type that extends Opaque before
-/// attemtping to use that type.
-@extra
-void registerOpaqueType<T extends Opaque>() {
-  sizeMap[T] = sizeOf<Opaque>();
-  registerNativeMarshallerOpaque<T>();
-}
-
-void _registerType<T extends NativeType>(int size) {
-  sizeMap[T] = size;
-  registerNativeMarshallerType<T>();
-}
 
 /// Represents the native heap.
 @extra
 class Memory implements Allocator {
-  /// Tracks if [Memory] has been initialized.
-  static bool _initalized = false;
-
   /// The endianess of data stored.
   ///
   /// The WebAssembly speficiation defines little endianess, so this is a constant.
   static const Endian endianess = Endian.little;
-
-  /// Must be called before working with `wasm_ffi` to initalize all type sizes.
-  ///
-  /// The optional parameter [pointerSizeBytes] can be used to adjust the size
-  /// of pointers. It defaults to `4` since WebAssembly usually uses 32 bit pointers.
-  /// If you want to use wasm64, set [pointerSizeBytes] to `8` to denote 64 bit pointers.
-  static void init([int pointerSizeBytes = 4]) {
-    if (_initalized) {
-      return;
-    }
-    _initalized = true;
-    _registerType<Float>(4);
-    _registerType<Double>(8);
-    _registerType<Int8>(1);
-    _registerType<Uint8>(1);
-    _registerType<Int16>(2);
-    _registerType<Uint16>(2);
-    _registerType<Int32>(4);
-    _registerType<Uint32>(4);
-    _registerType<Int64>(8);
-    _registerType<Uint64>(8);
-    _registerType<Char>(1);
-    _registerType<IntPtr>(pointerSizeBytes);
-    _registerType<Opaque>(pointerSizeBytes);
-    registerNativeMarshallerType<Void>();
-    registerNativeMarshallerType<NativeFunction<dynamic>>();
-  }
 
   /// The default [Memory] object to use.
   ///
@@ -118,8 +72,3 @@ WasmSymbol symbolByName(Memory m, String name) {
     throw ArgumentError('Could not find symbol $name!');
   }
 }
-
-/// Used on [DynamicLibrary] creation to control if the therby newly created
-/// [Memory] object should be registered as [Memory.global].
-@extra
-enum GlobalMemory { yes, no, ifNotSet }

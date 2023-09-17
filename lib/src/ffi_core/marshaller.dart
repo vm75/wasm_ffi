@@ -1,10 +1,77 @@
 import 'package:meta/meta.dart';
 
+import 'annotations.dart';
 import 'invoker_generated.dart';
 import 'memory.dart';
 import 'modules/exceptions.dart';
 import 'type_utils.dart';
 import 'types.dart';
+
+final Map<Type, int> sizeMap = {};
+
+/// Tracks if [Memory] has been initialized.
+bool _typesInitalized = false;
+
+/// Must be called with each type that extends Opaque before
+/// attemtping to use that type.
+@extra
+void registerOpaqueType<T extends Opaque>() {
+  sizeMap[T] = sizeOf<Opaque>();
+  _registerNativeMarshallerOpaque<T>();
+}
+
+void _registerType<T extends NativeType>(int size) {
+  sizeMap[T] = size;
+  _registerNativeMarshallerType<T>();
+}
+
+/// Number of bytes used by native type T.
+///
+/// MUST NOT be called with types annoteted with @[unsized] or
+/// before [Memory.init()] was called or else an exception will be thrown.
+int sizeOf<T extends NativeType>() {
+  int? size;
+  if (isPointerType<T>()) {
+    size = sizeMap[IntPtr];
+  } else {
+    size = sizeMap[T];
+  }
+  if (size != null) {
+    return size;
+  } else {
+    throw ArgumentError('The type $T is not known!');
+  }
+}
+
+/// Must be called before working with `wasm_ffi` to initalize all type sizes.
+///
+/// The optional parameter [pointerSizeBytes] can be used to adjust the size
+/// of pointers. It defaults to `4` since WebAssembly usually uses 32 bit pointers.
+/// If you want to use wasm64, set [pointerSizeBytes] to `8` to denote 64 bit pointers.
+void initTypes([int pointerSizeBytes = 4]) {
+  if (_typesInitalized) {
+    return;
+  }
+  _typesInitalized = true;
+  _registerType<Int>(pointerSizeBytes);
+  _registerType<UnsignedInt>(pointerSizeBytes);
+  _registerType<Float>(4);
+  _registerType<Double>(8);
+  _registerType<Int8>(1);
+  _registerType<Uint8>(1);
+  _registerType<Int16>(2);
+  _registerType<Uint16>(2);
+  _registerType<Int32>(4);
+  _registerType<Uint32>(4);
+  _registerType<Int64>(8);
+  _registerType<Uint64>(8);
+  _registerType<Size>(pointerSizeBytes);
+  _registerType<IntPtr>(pointerSizeBytes);
+  _registerType<UintPtr>(pointerSizeBytes);
+  _registerType<Opaque>(pointerSizeBytes);
+  _registerNativeMarshallerType<Void>();
+  _registerNativeMarshallerType<NativeFunction<dynamic>>();
+}
 
 // Called from the invokers
 T execute<T>(Function base, List<Object> args, Memory memory) {
@@ -73,7 +140,7 @@ final Map<String, Function> _knownTypes2 = {
   typeString<void>(): (o, b) => _toDartType<void>(o, b),
 };
 
-void registerNativeMarshallerType<T extends NativeType>() {
+void _registerNativeMarshallerType<T extends NativeType>() {
   _knownTypes[typeString<Pointer<T>>()] = InvokeHelper<Pointer<T>>(null, null);
   _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       InvokeHelper<Pointer<Pointer<T>>>(null, null);
@@ -83,7 +150,7 @@ void registerNativeMarshallerType<T extends NativeType>() {
       (o, b) => _toDartType<Pointer<Pointer<T>>>(o, b);
 }
 
-void registerNativeMarshallerOpaque<T extends Opaque>() {
+void _registerNativeMarshallerOpaque<T extends Opaque>() {
   _knownTypes[typeString<Pointer<T>>()] = OpaqueInvokeHelper<T>(null, null);
   _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       OpaqueInvokeHelperSquare<T>(null, null);
