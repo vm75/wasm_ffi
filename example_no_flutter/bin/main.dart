@@ -5,5 +5,5 @@ Future<void> main() async {
   DynamicLibrary opus = openOpus();
   FunctionsAndGlobals opusLibinfo = new FunctionsAndGlobals(opus);
   Pointer<Uint8> cString = opusLibinfo.opus_get_version_string();
-  print(fromCString(cString));
+  print(cString.cast<Utf8>().toDartString());
 }

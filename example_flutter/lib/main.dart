@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'src/c_strings.dart';
 import 'src/generated.dart';
 import 'src/proxy_ffi.dart';
 
@@ -8,7 +7,8 @@ Future<void> main() async {
   await initFfi();
   DynamicLibrary dynLib = openOpus();
   FunctionsAndGlobals opusLibinfo = FunctionsAndGlobals(dynLib);
-  String version = fromCString(opusLibinfo.opus_get_version_string());
+  String version =
+      opusLibinfo.opus_get_version_string().cast<Utf8>().toDartString();
   runApp(MyApp(version));
 }
 

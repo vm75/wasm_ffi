@@ -1,7 +1,5 @@
 import 'dart:typed_data';
-
 import 'package:inject_js/inject_js.dart';
-
 import 'annotations.dart';
 import 'memory.dart';
 import 'modules/emscripten/emscripten_module.dart';

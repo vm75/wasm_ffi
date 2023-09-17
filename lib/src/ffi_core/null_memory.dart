@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'memory.dart';
 import 'types.dart';
 
