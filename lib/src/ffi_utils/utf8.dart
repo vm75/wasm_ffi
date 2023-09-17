@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import '../../wasm_ffi_core.dart';
+import '../ffi_core/annotations.dart';
 
 /// The contents of a native zero-terminated array of UTF-8 code units.
 ///
@@ -15,7 +16,7 @@ import '../../wasm_ffi_core.dart';
 typedef Utf8 = Uint8;
 
 /// Extension method for converting a`Pointer<Utf8>` to a [String].
-extension Utf8Pointer on Pointer<NativeType> {
+extension Utf8Pointer on Pointer<Utf8> {
   /// The number of UTF-8 code units in this zero-terminated UTF-8 string.
   ///
   /// The UTF-8 code units of the strings are the non-zero code units up to the
@@ -79,8 +80,8 @@ extension StringUtf8Pointer on String {
   /// the UTF-8 encoded result. See [Utf8Encoder] for details on encoding.
   ///
   /// Returns an [allocator]-allocated pointer to the result.
-  Pointer<T> toNativeUtf8<T extends NativeType>(Allocator allocator,
-      [int? size]) {
+  @different
+  Pointer<Utf8> toNativeUtf8(Allocator allocator, [int? size]) {
     final units = utf8.encode(this);
     size ??= units.length + 1;
     final Pointer<Uint8> result = allocator<Uint8>(size);

@@ -31,8 +31,8 @@ Future<String> testHello(String name, bool standalone) async {
   WasmBindings bindings = WasmBindings(library);
 
   return using((Arena arena) {
-    Pointer<Char> cString = name.toNativeUtf8(arena);
-    return bindings.hello(cString).toDartString();
+    Pointer<Char> cString = name.toNativeUtf8(arena).cast<Char>();
+    return bindings.hello(cString).cast<Utf8>().toDartString();
   }, library.memory);
 }
 

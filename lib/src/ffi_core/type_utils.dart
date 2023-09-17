@@ -6,47 +6,6 @@ import 'types.dart';
 Type _extractType<T>() => T;
 String typeString<T>() => _extractType<T>().toString();
 
-// Variable names begin with a capital letter on purpose (opposing dart conventions) to hilight that
-// they are treated like types (which are written with a captial letter in dart).
-final Type Pointer_IntPtr = _extractType<Pointer<IntPtr>>();
-final Type Pointer_UintPtr = _extractType<Pointer<UintPtr>>();
-final Type Pointer_Void = _extractType<Pointer<Void>>();
-final Type Pointer_Bool = _extractType<Pointer<Bool>>();
-final Type Pointer_Int = _extractType<Pointer<Int>>();
-final Type Pointer_Int8 = _extractType<Pointer<Int8>>();
-final Type Pointer_Int16 = _extractType<Pointer<Int16>>();
-final Type Pointer_Int32 = _extractType<Pointer<Int32>>();
-final Type Pointer_Int64 = _extractType<Pointer<Int64>>();
-final Type Pointer_Double = _extractType<Pointer<Double>>();
-final Type Pointer_UnsignedInt = _extractType<Pointer<UnsignedInt>>();
-final Type Pointer_Uint8 = _extractType<Pointer<Uint8>>();
-final Type Pointer_Uint16 = _extractType<Pointer<Uint16>>();
-final Type Pointer_Uint32 = _extractType<Pointer<Uint32>>();
-final Type Pointer_Uint64 = _extractType<Pointer<Uint64>>();
-final Type Pointer_Char = _extractType<Pointer<Char>>();
-final Type Pointer_Float = _extractType<Pointer<Float>>();
-final Type Pointer_Opaque = _extractType<Pointer<Opaque>>();
-final Type Pointer_Pointer_IntPtr = _extractType<Pointer<Pointer<IntPtr>>>();
-final Type Pointer_Pointer_UintPtr = _extractType<Pointer<Pointer<UintPtr>>>();
-final Type Pointer_Pointer_Void = _extractType<Pointer<Pointer<Void>>>();
-final Type Pointer_Pointer_Bool = _extractType<Pointer<Pointer<Bool>>>();
-final Type Pointer_Pointer_Int = _extractType<Pointer<Pointer<Int>>>();
-final Type Pointer_Pointer_Int8 = _extractType<Pointer<Pointer<Int8>>>();
-final Type Pointer_Pointer_Int16 = _extractType<Pointer<Pointer<Int16>>>();
-final Type Pointer_Pointer_Int32 = _extractType<Pointer<Pointer<Int32>>>();
-final Type Pointer_Pointer_Int64 = _extractType<Pointer<Pointer<Int64>>>();
-final Type Pointer_Pointer_Double = _extractType<Pointer<Pointer<Double>>>();
-final Type Pointer_Pointer_UnsignedInt =
-    _extractType<Pointer<Pointer<UnsignedInt>>>();
-final Type Pointer_Pointer_Uint8 = _extractType<Pointer<Pointer<Uint8>>>();
-final Type Pointer_Pointer_Uint16 = _extractType<Pointer<Pointer<Uint16>>>();
-final Type Pointer_Pointer_Uint32 = _extractType<Pointer<Pointer<Uint32>>>();
-final Type Pointer_Pointer_Uint64 = _extractType<Pointer<Pointer<Uint64>>>();
-final Type Pointer_Pointer_Char = _extractType<Pointer<Pointer<Char>>>();
-final Type Pointer_Pointer_Float = _extractType<Pointer<Pointer<Float>>>();
-final Type Pointer_Pointer_Opaque = _extractType<Pointer<Pointer<Opaque>>>();
-final Type Pointer_NativeFunction_dynamic =
-    _extractType<Pointer<NativeFunction<dynamic>>>();
 final Type DartVoidType = _extractType<void>();
 final Type FfiVoidType = _extractType<Void>();
 
