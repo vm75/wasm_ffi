@@ -18,3 +18,21 @@ void freeMemory(char* buffer)
         free(buffer);
     }
 }
+
+/// size of an int
+int intSize()
+{
+    return (int)sizeof(int);
+}
+
+/// size of a bool
+int boolSize()
+{
+    return (int)sizeof(_Bool);
+}
+
+/// size of a pointer
+int pointerSize()
+{
+    return (int)sizeof(void*);
+}

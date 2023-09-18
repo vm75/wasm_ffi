@@ -49,4 +49,31 @@ class WasmBindings {
           'freeMemory');
   late final _freeMemory =
       _freeMemoryPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
+  /// size of an int
+  int intSize() {
+    return _intSize();
+  }
+
+  late final _intSizePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('intSize');
+  late final _intSize = _intSizePtr.asFunction<int Function()>();
+
+  /// size of a bool
+  int boolSize() {
+    return _boolSize();
+  }
+
+  late final _boolSizePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('boolSize');
+  late final _boolSize = _boolSizePtr.asFunction<int Function()>();
+
+  /// size of a pointer
+  int pointerSize() {
+    return _pointerSize();
+  }
+
+  late final _pointerSizePtr =
+      _lookup<ffi.NativeFunction<ffi.Int Function()>>('pointerSize');
+  late final _pointerSize = _pointerSizePtr.asFunction<int Function()>();
 }

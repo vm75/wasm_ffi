@@ -3,7 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'wasm_bindings.dart';
 
-Future<String> testHello(String name, bool standalone) async {
+class Result {
+  final String helloStr;
+  int sizeOfInt;
+  int sizeOfBool;
+  int sizeOfPointer;
+
+  Result(this.helloStr, this.sizeOfInt, this.sizeOfBool, this.sizeOfPointer);
+
+  @override
+  String toString() {
+    return 'hello: $helloStr, int: $sizeOfInt, bool: $sizeOfBool, pointer: $sizeOfPointer';
+  }
+}
+
+Future<Result> testHello(String name, bool standalone) async {
   DynamicLibrary? library;
   if (standalone) {
     // Load the WebAssembly binary from assets
@@ -32,22 +46,26 @@ Future<String> testHello(String name, bool standalone) async {
 
   return using((Arena arena) {
     Pointer<Char> cString = name.toNativeUtf8(arena).cast<Char>();
-    return bindings.hello(cString).cast<Utf8>().toDartString();
+    String helloStr = bindings.hello(cString).cast<Utf8>().toDartString();
+    int sizeOfInt = bindings.intSize();
+    int sizeOfBool = bindings.boolSize();
+    int sizeOfPointer = bindings.pointerSize();
+    return Result(helloStr, sizeOfInt, sizeOfBool, sizeOfPointer);
   }, library.memory);
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  String standaloneResult = await testHello("standalone world", true);
-  String emscriptenResult = await testHello("js world", false);
+  Result standaloneResult = await testHello("standalone world", true);
+  Result emscriptenResult = await testHello("js world", false);
 
   runApp(MyApp(standaloneResult, emscriptenResult, key: UniqueKey()));
 }
 
 class MyApp extends StatelessWidget {
-  final String _standaloneResult;
-  final String _emscriptenResult;
+  final Result _standaloneResult;
+  final Result _emscriptenResult;
 
   const MyApp(this._standaloneResult, this._emscriptenResult, {super.key});
 
