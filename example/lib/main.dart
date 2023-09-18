@@ -10,7 +10,7 @@ Future<String> testHello(String name, bool standalone) async {
     String path = 'assets/standalone.wasm';
     Uint8List wasmBinary = (await rootBundle.load(path)).buffer.asUint8List();
     library = await DynamicLibrary.open(
-      WasmType.standalone,
+      WasmType.wasm32Standalone,
       wasmBinary: wasmBinary,
     );
   } else {
@@ -21,7 +21,7 @@ Future<String> testHello(String name, bool standalone) async {
     // After we loaded the wasm binaries and injected the js code
     // into our webpage, we obtain a module
     library = await DynamicLibrary.open(
-      WasmType.withJs,
+      WasmType.wasm32WithJs,
       moduleName: "WasmFfi",
       wasmBinary: wasmBinary,
       jsModule: 'assets/emscripten.js',

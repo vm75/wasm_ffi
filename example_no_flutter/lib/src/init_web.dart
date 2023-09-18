@@ -7,7 +7,7 @@ Future<void> initFfi() async {
   // Only initalize if there is no module yet
   if (_library == null) {
     _library = await DynamicLibrary.open(
-      WasmType.withJs,
+      WasmType.wasm32WithJs,
       moduleName: 'libopus',
     );
   }

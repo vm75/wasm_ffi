@@ -16,7 +16,7 @@ Future<void> initFfi() async {
     Uint8List wasmBinary = (await rootBundle.load(path)).buffer.asUint8List();
 
     _library = await DynamicLibrary.open(
-      WasmType.withJs,
+      WasmType.wasm32WithJs,
       moduleName: 'libopus',
       wasmBinary: wasmBinary,
       jsModule: '$_basePath/libopus.js',

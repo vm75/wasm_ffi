@@ -9,14 +9,14 @@ import 'types.dart';
 
 final Map<Type, int> sizeMap = {};
 
-/// Tracks if [Memory] has been initialized.
-bool _typesInitalized = false;
+/// The size of a pointer in bytes. Should be same for all loaded wasm modules.
+int? registeredPointerSizeBytes;
 
 /// Must be called with each type that extends Opaque before
 /// attemtping to use that type.
 @extra
-void registerOpaqueType<T extends Opaque>() {
-  sizeMap[T] = sizeOf<Opaque>();
+void registerOpaqueType<T extends Opaque>([int? size]) {
+  sizeMap[T] = size ?? sizeOf<Opaque>();
   _registerNativeMarshallerOpaque<T>();
 }
 
@@ -28,7 +28,7 @@ void _registerType<T extends NativeType>(int size) {
 /// Number of bytes used by native type T.
 ///
 /// MUST NOT be called with types annoteted with @[unsized] or
-/// before [Memory.init()] was called or else an exception will be thrown.
+/// before [initTypes] was called or else an exception will be thrown.
 int sizeOf<T extends NativeType>() {
   int? size;
   if (isPointerType<T>()) {
@@ -49,10 +49,14 @@ int sizeOf<T extends NativeType>() {
 /// of pointers. It defaults to `4` since WebAssembly usually uses 32 bit pointers.
 /// If you want to use wasm64, set [pointerSizeBytes] to `8` to denote 64 bit pointers.
 void initTypes([int pointerSizeBytes = 4]) {
-  if (_typesInitalized) {
+  if (registeredPointerSizeBytes != null) {
+    if (registeredPointerSizeBytes != pointerSizeBytes) {
+      throw MarshallingException(
+          'Can not change pointer size after it was set to $registeredPointerSizeBytes!');
+    }
     return;
   }
-  _typesInitalized = true;
+  registeredPointerSizeBytes = pointerSizeBytes;
   _registerType<Int>(pointerSizeBytes);
   _registerType<UnsignedInt>(pointerSizeBytes);
   _registerType<Float>(4);

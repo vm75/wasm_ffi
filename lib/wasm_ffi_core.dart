@@ -5,5 +5,6 @@ library wasm_ffi;
 export 'src/ffi_core/allocation.dart';
 export 'src/ffi_core/dynamic_library.dart';
 export 'src/ffi_core/extensions.dart';
+export 'src/ffi_core/marshaller.dart' show registerOpaqueType;
 export 'src/ffi_core/native_finalizer.dart';
 export 'src/ffi_core/types.dart';

@@ -1,19 +1,21 @@
 import 'dart:typed_data';
 import 'package:inject_js/inject_js.dart';
+import '../../ffi_proxy.dart';
 import 'annotations.dart';
 import 'memory.dart';
 import 'modules/emscripten/emscripten_module.dart';
 import 'modules/module.dart';
 import 'modules/standalone/standalone_module.dart';
-import 'types.dart';
 
 /// Enum for StandaloneWasmModule and EmscriptenModule
 enum WasmType {
   /// The module is loaded from a wasm file
-  standalone,
+  wasm32Standalone,
+  wasm64Standalone,
 
   /// The module is loaded from a js file
-  withJs
+  wasm32WithJs,
+  wasm64WithJs,
 }
 
 /// Used on [DynamicLibrary] creation to control if the therby newly created
@@ -72,10 +74,16 @@ class DynamicLibrary {
     GlobalMemory? useAsGlobal,
   }) async {
     /// Initialize the native types in marshaller
-    initTypes();
+    if (type == WasmType.wasm32WithJs || type == WasmType.wasm32Standalone) {
+      initTypes(4);
+    } else {
+      initTypes(8);
+    }
+    registerOpaqueType<Utf8>(1);
+    registerOpaqueType<Utf16>(2);
 
     Module? module;
-    if (type == WasmType.withJs) {
+    if (type == WasmType.wasm32WithJs || type == WasmType.wasm64WithJs) {
       if (moduleName == null) {
         throw ArgumentError(
             'You need to provide a moduleName when loading a module with js!');
