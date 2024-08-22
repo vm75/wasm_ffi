@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'src/proxy_ffi.dart';
-import 'src/c_strings.dart';
 import 'src/generated.dart';
+import 'src/proxy_ffi.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initFfi();
   DynamicLibrary dynLib = openOpus();
   FunctionsAndGlobals opusLibinfo = FunctionsAndGlobals(dynLib);
-  String version = fromCString(opusLibinfo.opus_get_version_string());
+  String version =
+      opusLibinfo.opus_get_version_string().cast<Utf8>().toDartString();
   runApp(MyApp(version));
 }
 
 class MyApp extends StatelessWidget {
   final String _opusVersion;
 
-  const MyApp(this._opusVersion);
+  const MyApp(this._opusVersion, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'wasm_ffi Demo',
       home: Scaffold(
           appBar: AppBar(
-            title: Text('wasm_ffi Demo'),
+            title: const Text('wasm_ffi Demo'),
             centerTitle: true,
           ),
           body: Container(

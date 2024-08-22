@@ -10,5 +10,5 @@ Future<void> initFfi() async {
 DynamicLibrary openOpus() {
 // If you ONLY want to support web, uncomment this exception
 // throw new UnsupportedError('This package is only usable on the web!');
-  return new DynamicLibrary.open('libopus.so');
+  return DynamicLibrary.open('libopus.so');
 }
