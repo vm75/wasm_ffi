@@ -8,6 +8,7 @@ import '../../annotations.dart';
 import '../../memory.dart';
 import '../../type_utils.dart';
 import '../module.dart';
+import '../table.dart';
 
 @extra
 class StandaloneWasmModule extends Module {
@@ -52,6 +53,10 @@ class StandaloneWasmModule extends Module {
 
   @override
   ByteBuffer get heap => _instance.memories['memory']!.buffer;
+
+  @override
+  Table? get indirectFunctionTable =>
+      _instance.tables['__indirect_function_table'];
 
   @override
   int malloc(int size) {

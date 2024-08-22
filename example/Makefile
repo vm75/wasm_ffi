@@ -5,7 +5,7 @@ SHELL := /bin/sh
 # Set up directories and exported variables
 ASSETS_DIR := ./assets
 EXPORTED_RUNTIME_METHODS := '["ccall", "cwrap"]'
-EXPORTED_FUNCTIONS := '["_malloc", "_free", "_hello", "_intSize", "_boolSize", "_pointerSize", "_freeMemory"]'
+EXPORTED_FUNCTIONS := '["_malloc", "_free", "_hello", "_intSize", "_boolSize", "_pointerSize", "_freeMemory", "_foo"]'
 
 # Define source file and output paths
 SRC_DIR := ./src

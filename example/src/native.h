@@ -16,4 +16,7 @@ int boolSize();
 /// size of a pointer
 int pointerSize();
 
+/// callback
+int foo(int bar, int (*callback)(void*, int));
+
 #endif

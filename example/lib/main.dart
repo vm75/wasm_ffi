@@ -2,6 +2,7 @@ import 'package:wasm_ffi/ffi_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'wasm_bindings.dart';
+import 'dart:developer' as developer;
 
 class Result {
   final String helloStr;
@@ -15,6 +16,18 @@ class Result {
   String toString() {
     return 'hello: $helloStr, int: $sizeOfInt, bool: $sizeOfBool, pointer: $sizeOfPointer';
   }
+}
+
+typedef example_foo = Int32 Function(
+    Int32 bar, Pointer<NativeFunction<example_callback>>);
+typedef ExampleFoo = int Function(
+    int bar, Pointer<NativeFunction<example_callback>>);
+
+typedef example_callback = Int32 Function(Pointer<Void>, Int32);
+
+int callback(Pointer<Void> ptr, int i) {
+  developer.log('in callback i=$i');
+  return i + 1;
 }
 
 Future<Result> testHello(String name, bool standalone) async {
@@ -50,6 +63,19 @@ Future<Result> testHello(String name, bool standalone) async {
     int sizeOfInt = bindings.intSize();
     int sizeOfBool = bindings.boolSize();
     int sizeOfPointer = bindings.pointerSize();
+
+    if (!standalone) {
+      ExampleFoo nativeFoo =
+          library!.lookup<NativeFunction<example_foo>>('_foo').asFunction();
+
+      const except = -1;
+
+      nativeFoo(
+        100,
+        Pointer.fromFunction<example_callback>(callback, except),
+      );
+    }
+
     return Result(helloStr, sizeOfInt, sizeOfBool, sizeOfPointer);
   }, library.memory);
 }

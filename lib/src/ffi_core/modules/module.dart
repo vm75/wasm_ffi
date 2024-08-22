@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import '../../../wasm_ffi_core.dart';
 import '../annotations.dart';
 import '../memory.dart';
+import 'table.dart';
 
 /// Base class to interact with the WebAssembly.
 ///
@@ -54,6 +55,8 @@ abstract class Module {
 
   F lookupFunction<T extends Function, F extends Function>(
       String name, Memory memory);
+
+  Table? get indirectFunctionTable;
 }
 
 /// Describes something exported by the WebAssembly.

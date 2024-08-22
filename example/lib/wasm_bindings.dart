@@ -76,4 +76,33 @@ class WasmBindings {
   late final _pointerSizePtr =
       _lookup<ffi.NativeFunction<ffi.Int Function()>>('pointerSize');
   late final _pointerSize = _pointerSizePtr.asFunction<int Function()>();
+
+  /// callback
+  int foo(
+    int bar,
+    ffi.Pointer<
+            ffi
+            .NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Int)>>
+        callback,
+  ) {
+    return _foo(
+      bar,
+      callback,
+    );
+  }
+
+  late final _fooPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(
+              ffi.Int,
+              ffi.Pointer<
+                  ffi.NativeFunction<
+                      ffi.Int Function(
+                          ffi.Pointer<ffi.Void>, ffi.Int)>>)>>('foo');
+  late final _foo = _fooPtr.asFunction<
+      int Function(
+          int,
+          ffi.Pointer<
+              ffi.NativeFunction<
+                  ffi.Int Function(ffi.Pointer<ffi.Void>, ffi.Int)>>)>();
 }
