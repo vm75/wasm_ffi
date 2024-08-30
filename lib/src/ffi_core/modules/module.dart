@@ -88,8 +88,8 @@ class Global extends WasmSymbol {
 
   @override
   // ignore: hash_and_equals
-  bool operator ==(dynamic other) {
-    if (other != null && other is Global) {
+  bool operator ==(Object other) {
+    if (other is Global) {
       return name == other.name && address == other.address;
     } else {
       return false;
@@ -121,8 +121,8 @@ class FunctionDescription extends WasmSymbol {
   int get hashCode => '$name$argumentCount$tableIndex'.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other != null && other is FunctionDescription) {
+  bool operator ==(Object other) {
+    if (other is FunctionDescription) {
       return argumentCount == other.argumentCount &&
           name == other.name &&
           tableIndex == other.tableIndex;

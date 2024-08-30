@@ -17,9 +17,14 @@ external Object get _globalThis;
 @JS('Object.entries')
 external List? _entries(Object? o);
 
+@JS('WebAssembly.Global')
+class WasmGlobal {
+  external Object get value;
+}
+
 @JS()
 @anonymous
-class _EmscriptenModuleJs {
+class EmscriptenModuleJs {
   external Uint8List? get wasmBinary;
   // ignore: non_constant_identifier_names
   external Uint8List? get HEAPU8;
@@ -28,7 +33,7 @@ class _EmscriptenModuleJs {
   external Object? get wasmExports; // Emscripten >=3.1.44
 
   // Must have an unnamed factory constructor with named arguments.
-  external factory _EmscriptenModuleJs({Uint8List? wasmBinary});
+  external factory EmscriptenModuleJs({Uint8List? wasmBinary});
 }
 
 const String _github = r'https://github.com/vm75/wasm_ffi';
@@ -77,21 +82,22 @@ class EmscriptenModule extends Module {
 
   /// Documentation is in `emscripten_module_stub.dart`!
   static Future<EmscriptenModule> compile(
-      Uint8List wasmBinary, String moduleName,
-      {void Function(_EmscriptenModuleJs)? preinit}) async {
+      String moduleName, Uint8List? wasmBinary,
+      {void Function(EmscriptenModuleJs)? preinit}) async {
     Function moduleFunction = _moduleFunction(moduleName);
-    _EmscriptenModuleJs module = _EmscriptenModuleJs(wasmBinary: wasmBinary);
-    Object? o = moduleFunction(module);
-    preinit?.call(module);
+    EmscriptenModuleJs modulePrototype =
+        EmscriptenModuleJs(wasmBinary: wasmBinary);
+    Object? o = moduleFunction(modulePrototype);
     if (o != null) {
-      await promiseToFuture(o);
+      final module = await promiseToFuture<EmscriptenModuleJs>(o);
+      preinit?.call(module);
       return EmscriptenModule._fromJs(module);
     } else {
       throw StateError('Could not instantiate an emscripten module!');
     }
   }
 
-  final _EmscriptenModuleJs _emscriptenModuleJs;
+  final EmscriptenModuleJs _emscriptenModuleJs;
   final List<WasmSymbol> _exports;
   final _Malloc _malloc;
   final _Free _free;
@@ -106,7 +112,7 @@ class EmscriptenModule extends Module {
   EmscriptenModule._(this._emscriptenModuleJs, this._exports,
       this._indirectFunctionTable, this._malloc, this._free);
 
-  factory EmscriptenModule._fromJs(_EmscriptenModuleJs module) {
+  factory EmscriptenModule._fromJs(EmscriptenModuleJs module) {
     Object? asm = module.wasmExports ?? module.asm;
     if (asm != null) {
       Map<int, WasmSymbol> knownAddresses = {};
@@ -119,13 +125,17 @@ class EmscriptenModule extends Module {
         for (dynamic entry in entries) {
           if (entry is List) {
             Object value = entry.last;
-            if (value is int) {
-              Global g = Global(address: value, name: entry.first as String);
-              if (knownAddresses.containsKey(value) &&
-                  knownAddresses[value] is! Global) {
-                throw StateError(_adu(knownAddresses[value], g));
+            // TODO: Not sure if `value` can ever be `int` directly. I only
+            // observed it being WebAssembly.Global for globals.
+            if (value is int || ((value is WasmGlobal) && value.value is int)) {
+              final int address =
+                  (value is int) ? value : ((value as WasmGlobal).value as int);
+              Global g = Global(address: address, name: entry.first as String);
+              if (knownAddresses.containsKey(address) &&
+                  knownAddresses[address] is! Global) {
+                throw StateError(_adu(knownAddresses[address], g));
               }
-              knownAddresses[value] = g;
+              knownAddresses[address] = g;
               exports.add(g);
             } else if (value is Function) {
               FunctionDescription description =

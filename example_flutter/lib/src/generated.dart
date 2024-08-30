@@ -1,6 +1,7 @@
 /// Contains methods and structs from the opus_libinfo group of opus_defines.h.
 ///
 /// AUTOMATICALLY GENERATED FILE. DO NOT MODIFY.
+// ignore_for_file: type=lint
 
 library opus_libinfo;
 

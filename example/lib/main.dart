@@ -18,12 +18,11 @@ class Result {
   }
 }
 
-typedef example_foo = Int32 Function(
-    Int32 bar, Pointer<NativeFunction<example_callback>>);
-typedef ExampleFoo = int Function(
-    int bar, Pointer<NativeFunction<example_callback>>);
+// typedef example_foo = Int32 Function(
+//     Int32 bar, Pointer<NativeFunction<example_callback>>);
+typedef FooFunc = int Function(int bar, Pointer<NativeFunction<CallbackFunc>>);
 
-typedef example_callback = Int32 Function(Pointer<Void>, Int32);
+typedef CallbackFunc = Int32 Function(Pointer<Void>, Int32);
 
 int callback(Pointer<Void> ptr, int i) {
   developer.log('in callback i=$i');
@@ -65,14 +64,14 @@ Future<Result> testHello(String name, bool standalone) async {
     int sizeOfPointer = bindings.pointerSize();
 
     if (!standalone) {
-      ExampleFoo nativeFoo =
-          library!.lookup<NativeFunction<example_foo>>('_foo').asFunction();
+      FooFunc nativeFoo =
+          library!.lookup<NativeFunction<FooFunc>>('_foo').asFunction();
 
       const except = -1;
 
       nativeFoo(
         100,
-        Pointer.fromFunction<example_callback>(callback, except),
+        Pointer.fromFunction<CallbackFunc>(callback, except),
       );
     }
 

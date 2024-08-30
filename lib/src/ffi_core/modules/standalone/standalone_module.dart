@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:js/js_util.dart';
-import 'package:wasm_interop/wasm_interop.dart' as interop;
 
 import '../../../../wasm_ffi_core.dart';
 import '../../annotations.dart';
@@ -9,6 +8,7 @@ import '../../memory.dart';
 import '../../type_utils.dart';
 import '../module.dart';
 import '../table.dart';
+import 'interop.dart' as interop;
 
 @extra
 class StandaloneWasmModule extends Module {
@@ -55,8 +55,8 @@ class StandaloneWasmModule extends Module {
   ByteBuffer get heap => _instance.memories['memory']!.buffer;
 
   @override
-  Table? get indirectFunctionTable =>
-      _instance.tables['__indirect_function_table'];
+  Table? get indirectFunctionTable => null;
+  // TODO: _instance.tables['__indirect_function_table'];
 
   @override
   int malloc(int size) {
