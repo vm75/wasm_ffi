@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
 import 'annotations.dart';
+import 'exceptions.dart';
 import 'invoker_generated.dart';
 import 'memory.dart';
-import 'modules/exceptions.dart';
 import 'type_utils.dart';
 import 'types.dart';
 

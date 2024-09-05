@@ -36,9 +36,3 @@ int pointerSize()
 {
     return (int)sizeof(void*);
 }
-
-/// callback
-int foo(int bar, int (*callback)(void*, int))
-{
-    return callback(NULL, bar);
-}

@@ -102,22 +102,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  inject_js:
-    dependency: transitive
-    description:
-      name: inject_js
-      sha256: "3ab213e2c76375a611f57eb0044d32c6e18c5091d52510e7fe9f88f6bee83d19"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
-  js:
-    dependency: transitive
-    description:
-      name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.7"
   lints:
     dependency: transitive
     description:
@@ -178,10 +162,10 @@ packages:
     dependency: transitive
     description:
       name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.1"
+    version: "3.2.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -250,14 +234,14 @@ packages:
       relative: true
     source: path
     version: "0.9.4"
-  wasm_interop:
+  web:
     dependency: transitive
     description:
-      name: wasm_interop
-      sha256: b1b378f07a4cf0103c25faf34d9a64d2c3312135b9efb47e0ec116ec3b14e48f
+      name: web
+      sha256: d43c1d6b787bf0afad444700ae7f4db8827f701bc61c255ac8d328c6f4d52062
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "1.0.0"
   yaml:
     dependency: transitive
     description:
@@ -275,4 +259,4 @@ packages:
     source: hosted
     version: "2.2.1"
 sdks:
-  dart: ">=3.4.0 <4.0.0"
+  dart: ">=3.5.0 <4.0.0"

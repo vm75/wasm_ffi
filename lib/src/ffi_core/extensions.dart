@@ -18,8 +18,8 @@ extension NativeFunctionPointer<NF extends Function>
   /// a [ArgumentError](https://api.dart.dev/stable/dart-core/ArgumentError-class.html) is thrown.
   DF asFunction<DF extends Function>() {
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
-    if (symbol is FunctionDescription) {
-      return marshall<NF, DF>(symbol.function, boundMemory);
+    if (symbol is FunctionDescription && symbol.function is Function) {
+      return marshall<NF, DF>(symbol.function as Function, boundMemory);
     } else {
       throw ArgumentError(
           'No function at address $address was found (but a global symbol)!');

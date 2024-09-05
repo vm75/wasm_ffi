@@ -220,7 +220,7 @@ import '../../wasm_ffi_core.dart';
 // This will fix `useAsync2` above.
 // @Since('2.17')
 abstract interface class Finalizable {
-  factory Finalizable._() => throw UnsupportedError("");
+  factory Finalizable._() => throw UnsupportedError('');
 }
 
 /// The native function type for [NativeFinalizer]s.

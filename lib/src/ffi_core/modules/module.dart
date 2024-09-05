@@ -1,9 +1,10 @@
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import '../../../wasm_ffi_core.dart';
 import '../annotations.dart';
+import '../js_utils/wasm_interop.dart' as interop;
 import '../memory.dart';
-import 'table.dart';
 
 /// Base class to interact with the WebAssembly.
 ///
@@ -56,7 +57,7 @@ abstract class Module {
   F lookupFunction<T extends Function, F extends Function>(
       String name, Memory memory);
 
-  Table? get indirectFunctionTable;
+  interop.WasmTable? get indirectFunctionTable;
 }
 
 /// Describes something exported by the WebAssembly.
@@ -109,7 +110,7 @@ class FunctionDescription extends WasmSymbol {
   final int argumentCount;
 
   /// The actual function.
-  final Function function;
+  final JSFunction function;
   const FunctionDescription(
       {required int tableIndex,
       required super.name,

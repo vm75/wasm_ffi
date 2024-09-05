@@ -688,8 +688,8 @@ class InvokeHelper<T> {
     if (_base == null || _memory == null) {
       throw StateError('Call copyWith first!');
     }
-    Function base = _base!;
-    Memory memory = _memory!;
+    Function base = _base;
+    Memory memory = _memory;
     List<Object> args = [
       arg0,
       arg1,

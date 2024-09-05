@@ -1,12 +1,12 @@
 import 'dart:typed_data';
-import 'package:inject_js/inject_js.dart';
 import '../../ffi_proxy.dart';
 import 'annotations.dart';
+import 'js_utils/inject_js.dart';
+import 'js_utils/wasm_interop.dart' as interop;
 import 'memory.dart';
-import 'modules/emscripten/emscripten_module.dart';
+import 'modules/emscripten_module.dart';
 import 'modules/module.dart';
-import 'modules/standalone/standalone_module.dart';
-import 'modules/table.dart';
+import 'modules/standalone_module.dart';
 
 /// Enum for StandaloneWasmModule and EmscriptenModule
 enum WasmType {
@@ -107,13 +107,13 @@ class DynamicLibrary {
     switch (useAsGlobal ?? GlobalMemory.ifNotSet) {
       case GlobalMemory.yes:
         Memory.global = memory;
-        Table.global = module.indirectFunctionTable;
+        interop.WasmTable.global = module.indirectFunctionTable;
         break;
       case GlobalMemory.no:
         break;
       case GlobalMemory.ifNotSet:
         Memory.global ??= memory;
-        Table.global ??= module.indirectFunctionTable;
+        interop.WasmTable.global ??= module.indirectFunctionTable;
         break;
     }
 

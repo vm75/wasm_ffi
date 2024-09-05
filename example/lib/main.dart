@@ -1,8 +1,9 @@
 import 'package:wasm_ffi/ffi_proxy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'wasm_bindings.dart';
-import 'dart:developer' as developer;
+import 'hello_bindings.dart';
+import 'libopus_bindings.dart';
+// import 'dart:developer' as developer;
 
 class Result {
   final String helloStr;
@@ -16,17 +17,6 @@ class Result {
   String toString() {
     return 'hello: $helloStr, int: $sizeOfInt, bool: $sizeOfBool, pointer: $sizeOfPointer';
   }
-}
-
-// typedef example_foo = Int32 Function(
-//     Int32 bar, Pointer<NativeFunction<example_callback>>);
-typedef FooFunc = int Function(int bar, Pointer<NativeFunction<CallbackFunc>>);
-
-typedef CallbackFunc = Int32 Function(Pointer<Void>, Int32);
-
-int callback(Pointer<Void> ptr, int i) {
-  developer.log('in callback i=$i');
-  return i + 1;
 }
 
 Future<Result> testHello(String name, bool standalone) async {
@@ -62,20 +52,31 @@ Future<Result> testHello(String name, bool standalone) async {
     int sizeOfInt = bindings.intSize();
     int sizeOfBool = bindings.boolSize();
     int sizeOfPointer = bindings.pointerSize();
-
-    if (!standalone) {
-      FooFunc nativeFoo =
-          library!.lookup<NativeFunction<FooFunc>>('_foo').asFunction();
-
-      const except = -1;
-
-      nativeFoo(
-        100,
-        Pointer.fromFunction<CallbackFunc>(callback, except),
-      );
-    }
-
     return Result(helloStr, sizeOfInt, sizeOfBool, sizeOfPointer);
+  }, library.memory);
+}
+
+Future<String> testLibOpus() async {
+  DynamicLibrary? library;
+  // Load the WebAssembly binaries from assets
+  String path = 'assets/libopus.wasm';
+  Uint8List wasmBinary = (await rootBundle.load(path)).buffer.asUint8List();
+
+  // After we loaded the wasm binaries and injected the js code
+  // into our webpage, we obtain a module
+  library = await DynamicLibrary.open(
+    WasmType.wasm32WithJs,
+    moduleName: "libopus",
+    wasmBinary: wasmBinary,
+    jsModule: 'assets/libopus.js',
+  );
+
+  FunctionsAndGlobals bindings = FunctionsAndGlobals(library);
+
+  return using((Arena arena) {
+    String version =
+        bindings.opus_get_version_string().cast<Utf8>().toDartString();
+    return version;
   }, library.memory);
 }
 
@@ -84,15 +85,19 @@ Future<void> main() async {
 
   Result standaloneResult = await testHello("standalone world", true);
   Result emscriptenResult = await testHello("js world", false);
+  String version = await testLibOpus();
 
-  runApp(MyApp(standaloneResult, emscriptenResult, key: UniqueKey()));
+  runApp(MyApp(standaloneResult, emscriptenResult, version, key: UniqueKey()));
 }
 
 class MyApp extends StatelessWidget {
   final Result _standaloneResult;
   final Result _emscriptenResult;
+  final String _libopusVersion;
 
-  const MyApp(this._standaloneResult, this._emscriptenResult, {super.key});
+  const MyApp(
+      this._standaloneResult, this._emscriptenResult, this._libopusVersion,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +119,10 @@ class MyApp extends StatelessWidget {
                 ),
                 Text(
                   'Emscripten: $_emscriptenResult',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(
+                  'libopus version: $_libopusVersion',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],

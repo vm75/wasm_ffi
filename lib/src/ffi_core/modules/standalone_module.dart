@@ -1,38 +1,38 @@
+import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:js/js_util.dart';
-
-import '../../../../wasm_ffi_core.dart';
-import '../../annotations.dart';
-import '../../memory.dart';
-import '../../type_utils.dart';
-import '../module.dart';
-import '../table.dart';
-import 'interop.dart' as interop;
+import '../annotations.dart';
+import '../js_utils/wasm_interop.dart';
+import '../memory.dart';
+import '../type_utils.dart';
+import '../types.dart';
+import 'module.dart';
 
 @extra
 class StandaloneWasmModule extends Module {
-  final interop.Instance _instance;
+  final Instance _instance;
   final List<WasmSymbol> _exports = [];
 
   @override
   List<WasmSymbol> get exports => _exports;
 
   static Future<StandaloneWasmModule> compile(Uint8List wasmBinary) async {
-    final wasmInstance = await interop.Instance.fromBytesAsync(wasmBinary);
+    final wasmInstance = await Instance.loadFromBinary(wasmBinary);
     return StandaloneWasmModule._(wasmInstance);
   }
 
-  FunctionDescription _fromWasmFunction(String name, Function func, int index) {
-    String? s = getProperty(func, 'name');
-    if (s != null) {
-      int? length = getProperty(func, 'length');
+  FunctionDescription _fromWasmFunction(
+      String name, JSFunction func, int index) {
+    final funcDesc = func as WrappedJSFunction;
+
+    if (funcDesc.name != null) {
+      final length = funcDesc.length;
       if (length != null) {
         return FunctionDescription(
             tableIndex: index,
             name: name,
             function: func,
-            argumentCount: length);
+            argumentCount: length.toDartInt);
       }
     }
     throw ArgumentError('$name does not seem to be a function symbol!');
@@ -48,21 +48,26 @@ class StandaloneWasmModule extends Module {
   @override
   void free(int pointer) {
     final func = _instance.functions['free'];
-    func?.call(pointer);
+    if (func is Function) {
+      (func as Function).call(pointer);
+    }
   }
 
   @override
-  ByteBuffer get heap => _instance.memories['memory']!.buffer;
+  ByteBuffer get heap => _instance.memories['memory']!.buffer.toDart;
 
   @override
-  Table? get indirectFunctionTable => null;
-  // TODO: _instance.tables['__indirect_function_table'];
+  WasmTable? get indirectFunctionTable =>
+      _instance.tables['__indirect_function_table'];
 
   @override
   int malloc(int size) {
     final func = _instance.functions['malloc'];
-    final resp = func?.call(size) as int;
-    return resp;
+    if (func is Function) {
+      final resp = (func as Function).call(size) as int;
+      return resp;
+    }
+    return -1;
   }
 
   /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
