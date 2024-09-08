@@ -5,11 +5,8 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
-import 'package:web/web.dart' as web;
-
-@JS()
-external JSPromise<web.Response> fetch(web.URL resource,
-    [web.RequestInit? options]);
+@JS('fetch')
+external JSPromise<JSObject> _fetch(JSString resource);
 
 @JS('BigInt')
 external JSBigInt _bigInt(JSAny? s);
@@ -229,11 +226,11 @@ class Instance {
   }
 
   static Future<Instance> loadfromUrl(
-    web.URL url, {
+    String url, {
     Map<String, Map<String, JSAny?>> imports = const {},
   }) async {
     final importsJs = _createJsImports(imports);
-    final response = await fetch(url).toDart;
+    final response = await _fetch(url.toJS).toDart;
     final native = await _instantiateStreaming(response, importsJs).toDart;
 
     // If the module has an `_initialize` export, it needs to be called to run

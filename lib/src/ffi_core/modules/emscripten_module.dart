@@ -114,54 +114,52 @@ class EmscriptenModule extends Module {
       WasmTable? indirectFunctionTable;
       // if (entries is List<Object>) {
       for (dynamic entry in entries) {
-        if (entry is List) {
-          Object value = entry.last;
-          // TODO: Not sure if `value` can ever be `int` directly. I only
-          // observed it being WebAssembly.Global for globals.
-          if (value is int ||
-              (WasmGlobal.isInstance(value as WasmGlobal) &&
-                  value.value is int)) {
-            final int address =
-                (value is int) ? value : ((value as WasmGlobal).value as int);
-            Global g = Global(address: address, name: entry.first as String);
-            if (knownAddresses.containsKey(address) &&
-                knownAddresses[address] is! Global) {
-              throw StateError(_adu(knownAddresses[address], g));
-            }
-            knownAddresses[address] = g;
-            exports.add(g);
-          } else if (value is Function) {
-            FunctionDescription description =
-                _fromWasmFunction(entry.first as String, value as JSFunction);
-            // It might happen that there are two different c functions that do nothing else than calling the same underlying c function
-            // In this case, a compiler might substitute both functions with the underlying c function
-            // So we got two functions with different names at the same table index
-            // So it is actually ok if there are two things at the same address, as long as they are both functions
-            if (knownAddresses.containsKey(description.tableIndex) &&
-                knownAddresses[description.tableIndex]
-                    is! FunctionDescription) {
-              throw StateError(
-                  _adu(knownAddresses[description.tableIndex], description));
-            }
-            knownAddresses[description.tableIndex] = description;
-            exports.add(description);
-            if (description.name == 'malloc') {
-              malloc = description.function as _Malloc;
-            } else if (description.name == 'free') {
-              free = description.function as _Free;
-            }
-          } else if (WasmTable.isInstance(value as WasmTable) &&
-              entry.first as String == '__indirect_function_table') {
-            indirectFunctionTable = value as WasmTable;
-          } else if (entry.first as String == 'memory') {
-            // ignore memory object
-          } else {
-            // ignore unknown entries
-            // throw StateError(
-            //     'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
-          }
-        } else {
+        if (entry is! List) {
           throw StateError("Unexpected entry in entries(Module['asm'])!");
+        }
+        Object value = entry.last;
+        // TODO: Not sure if `value` can ever be `int` directly. I only
+        // observed it being WebAssembly.Global for globals.
+        if (value is int ||
+            (WasmGlobal.isInstance(value as WasmGlobal) &&
+                value.value is int)) {
+          final int address =
+              (value is int) ? value : ((value as WasmGlobal).value as int);
+          Global g = Global(address: address, name: entry.first as String);
+          if (knownAddresses.containsKey(address) &&
+              knownAddresses[address] is! Global) {
+            throw StateError(_adu(knownAddresses[address], g));
+          }
+          knownAddresses[address] = g;
+          exports.add(g);
+        } else if (value is Function) {
+          FunctionDescription description =
+              _fromWasmFunction(entry.first as String, value as JSFunction);
+          // It might happen that there are two different c functions that do nothing else than calling the same underlying c function
+          // In this case, a compiler might substitute both functions with the underlying c function
+          // So we got two functions with different names at the same table index
+          // So it is actually ok if there are two things at the same address, as long as they are both functions
+          if (knownAddresses.containsKey(description.tableIndex) &&
+              knownAddresses[description.tableIndex] is! FunctionDescription) {
+            throw StateError(
+                _adu(knownAddresses[description.tableIndex], description));
+          }
+          knownAddresses[description.tableIndex] = description;
+          exports.add(description);
+          if (description.name == 'malloc') {
+            malloc = description.function as _Malloc;
+          } else if (description.name == 'free') {
+            free = description.function as _Free;
+          }
+        } else if (WasmTable.isInstance(value as WasmTable) &&
+            entry.first as String == '__indirect_function_table') {
+          indirectFunctionTable = value as WasmTable;
+        } else if (entry.first as String == 'memory') {
+          // ignore memory object
+        } else {
+          // ignore unknown entries
+          // throw StateError(
+          //     'Warning: Unexpected value in entry list! Entry is $entry, value is $value (of type ${value.runtimeType})');
         }
       }
       if (malloc == null) {
@@ -172,10 +170,6 @@ class EmscriptenModule extends Module {
       }
       return EmscriptenModule._(
           module, exports, indirectFunctionTable, malloc, free);
-      // } else {
-      //   throw StateError(
-      //       'JavaScript error: Could not access entries of Module[\'asm\']!');
-      // }
     } else {
       _Malloc? malloc;
       _Free? free;
