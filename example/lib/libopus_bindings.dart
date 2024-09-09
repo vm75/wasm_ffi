@@ -5,7 +5,7 @@
 
 library opus_libinfo;
 
-import 'package:wasm_ffi/wasm_ffi.dart' as ffi;
+import 'package:wasm_ffi/ffi_bridge.dart' as ffi;
 
 typedef _opus_get_version_string_C = ffi.Pointer<ffi.Uint8> Function();
 typedef _opus_get_version_string_Dart = ffi.Pointer<ffi.Uint8> Function();

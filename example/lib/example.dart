@@ -1,6 +1,6 @@
-import 'package:wasm_ffi/ffi_helper.dart';
-import 'package:wasm_ffi/wasm_ffi.dart';
-import 'package:wasm_ffi/wasm_ffi_utils.dart';
+import 'package:wasm_ffi/ffi_bridge.dart';
+import 'package:wasm_ffi/ffi_utils_bridge.dart';
+import 'package:wasm_ffi/ffi_wrapper.dart';
 import 'libopus_bindings.dart';
 import 'wasmffi_bindings.dart';
 
@@ -19,16 +19,16 @@ class Result {
 }
 
 Future<Result> testWasmFfi(String name, bool standalone) async {
-  FfiHelper? ffiHelper;
+  FfiWrapper? ffiWrapper;
   if (standalone) {
-    ffiHelper = await FfiHelper.load('assets/standalone/WasmFfi.wasm');
+    ffiWrapper = await FfiWrapper.load('assets/standalone/WasmFfi.wasm');
   } else {
-    ffiHelper = await FfiHelper.load('assets/emscripten/WasmFfi.js');
+    ffiWrapper = await FfiWrapper.load('assets/emscripten/WasmFfi.js');
   }
 
-  WasmFfiBindings bindings = WasmFfiBindings(ffiHelper.library);
+  WasmFfiBindings bindings = WasmFfiBindings(ffiWrapper.library);
 
-  return ffiHelper.safeUsing((Arena arena) {
+  return ffiWrapper.safeUsing((Arena arena) {
     Pointer<Char> cString = name.toNativeUtf8().cast<Char>();
     String helloStr = bindings.hello(cString).cast<Utf8>().toDartString();
     int sizeOfInt = bindings.intSize();
@@ -39,11 +39,11 @@ Future<Result> testWasmFfi(String name, bool standalone) async {
 }
 
 Future<String> testLibOpus() async {
-  final ffiHelper = await FfiHelper.load('assets/emscripten/libopus.js');
+  final ffiWrapper = await FfiWrapper.load('assets/emscripten/libopus.js');
 
-  FunctionsAndGlobals bindings = FunctionsAndGlobals(ffiHelper.library);
+  FunctionsAndGlobals bindings = FunctionsAndGlobals(ffiWrapper.library);
 
-  return ffiHelper.safeUsing((Arena arena) {
+  return ffiWrapper.safeUsing((Arena arena) {
     String version =
         bindings.opus_get_version_string().cast<Utf8>().toDartString();
     return version;

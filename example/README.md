@@ -2,29 +2,26 @@ A vanilla Dart example for [wasm_ffi](https://pub.dev/packages/wasm_ffi).
 
 # Setup
 
-Native code is in src folder.
+## ffigen (if native source is modified)
+Generates bindings using [`package:ffigen`](https://pub.dev/packages/ffigen).
+Replace `import 'dart:ffi' as ffi;` with `import 'package:wasm_ffi/ffi_bridge.dart' as ffi;` in the generated binding files
 
-## ffigen
+## Running web app
 
-Uses [`package:web`](https://pub.dev/packages/web)
-to interop with JS and the DOM.
-
-## Running and building
-
-To run the app,
-activate and use [`package:webdev`](https://dart.dev/tools/webdev):
-
+Running the example app requires [`package:webdev`](https://dart.dev/tools/webdev).
 ```
 dart pub global activate webdev
+```
+
+To run the web app, cd to example folder and run:
+```
 webdev serve
 ```
+Then open http://localhost:8080 in your browser
 
-To build a production version ready for deployment,
-use the `webdev build` command:
+## Running dart app
 
+To run the app, cd to example folder and run:
 ```
-webdev build
+dart run
 ```
-
-To learn how to interop with web APIs and other JS libraries,
-check out https://dart.dev/interop/js-interop.

@@ -1,3 +1,7 @@
+## [1.0.0]
+
+- Added support for standalone wasm and added wrapper utility
+
 ## [0.9.5]
 * Fixed compatibility with Emscripten 3.1.44
 * Improved support for `Pointer<Utf8>`
