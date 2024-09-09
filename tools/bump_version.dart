@@ -39,7 +39,7 @@ void changeLog(Version to, String log) {
   for (final path in changeLogFiles) {
     final file = File(path);
     final contents = file.readAsStringSync();
-    final prefix = '## [$to]\n\n- $log\n\n';
+    final prefix = '## [$to]\n* $log\n\n';
     file.writeAsStringSync(prefix);
     file.writeAsStringSync(contents, mode: FileMode.append);
   }
