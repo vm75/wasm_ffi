@@ -2,5 +2,5 @@
 /// While some things are missing, new things were added, identifiable by the @[extra] annotation.
 library wasm_ffi;
 
-export 'package:wasm_ffi/_export_ffi/export_wasm_ffi.dart'
-    if (dart.library.ffi) 'package:wasm_ffi/_export_ffi/export_dart_ffi.dart';
+export 'package:wasm_ffi/_wasm_ffi/ffi.dart'
+    if (dart.library.ffi) 'package:wasm_ffi/_dart_ffi/ffi.dart';

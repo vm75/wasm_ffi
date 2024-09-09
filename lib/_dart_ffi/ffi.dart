@@ -1,5 +1,3 @@
-library _export_ffi;
-
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 export 'dart:ffi';
