@@ -133,8 +133,7 @@ class DynamicLibrary {
 
     Memory memory = createMemory(module);
 
-    // TODO: use ifNotSet
-    switch (useAsGlobal ?? GlobalMemory.yes) {
+    switch (useAsGlobal ?? GlobalMemory.ifNotSet) {
       case GlobalMemory.yes:
         Memory.global = memory;
         interop.WasmTable.global = module.indirectFunctionTable;

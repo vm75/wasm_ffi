@@ -1,8 +1,8 @@
 import 'package:wasm_ffi/ffi_helper.dart';
 import 'package:wasm_ffi/wasm_ffi.dart';
 import 'package:wasm_ffi/wasm_ffi_utils.dart';
-import 'wasmffi_bindings.dart';
 import 'libopus_bindings.dart';
+import 'wasmffi_bindings.dart';
 
 class Result {
   final String helloStr;
@@ -28,7 +28,7 @@ Future<Result> testWasmFfi(String name, bool standalone) async {
 
   WasmFfiBindings bindings = WasmFfiBindings(ffiHelper.library);
 
-  return ffiHelper.usingLibrary((Arena arena) {
+  return ffiHelper.safeUsing((Arena arena) {
     Pointer<Char> cString = name.toNativeUtf8().cast<Char>();
     String helloStr = bindings.hello(cString).cast<Utf8>().toDartString();
     int sizeOfInt = bindings.intSize();
@@ -43,7 +43,7 @@ Future<String> testLibOpus() async {
 
   FunctionsAndGlobals bindings = FunctionsAndGlobals(ffiHelper.library);
 
-  return ffiHelper.usingLibrary((Arena arena) {
+  return ffiHelper.safeUsing((Arena arena) {
     String version =
         bindings.opus_get_version_string().cast<Utf8>().toDartString();
     return version;
