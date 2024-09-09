@@ -1,11 +1,9 @@
 import 'dart:typed_data';
+import 'annotations.dart';
+import 'marshaller.dart';
+import 'memory.dart';
+import 'modules/module.dart';
 import 'types.dart';
-
-import '../modules/memory.dart';
-import '../modules/module.dart';
-import '../internal/marshaller.dart';
-
-import '../../wasm_ffi_meta.dart';
 
 /// Extension on [Pointer] specialized for the type argument [NativeFunction].
 extension NativeFunctionPointer<NF extends Function>
@@ -20,32 +18,13 @@ extension NativeFunctionPointer<NF extends Function>
   /// a [ArgumentError](https://api.dart.dev/stable/dart-core/ArgumentError-class.html) is thrown.
   DF asFunction<DF extends Function>() {
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
-    if (symbol is FunctionDescription) {
-      return marshall<NF, DF>(symbol.function, boundMemory);
+    if (symbol is FunctionDescription && symbol.function is Function) {
+      return marshall<NF, DF>(symbol.function as Function, boundMemory);
     } else {
       throw ArgumentError(
           'No function at address $address was found (but a global symbol)!');
     }
   }
-}
-
-extension DynamicLibraryExtension on DynamicLibrary {
-  /// Helper that combines lookup and cast to a Dart function.
-  ///
-  /// This simply calles [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
-  /// internally, so see this two methods for additional insights.
-  F lookupFunction<T extends Function, F extends Function>(String name) =>
-      lookup<NativeFunction<T>>(name).asFunction<F>();
-}
-
-/// Extension on [Allocator] to provide allocation with [NativeType].
-extension AllocatorAlloc on Allocator {
-  /// Allocates `sizeOf<T>() * count` bytes of memory using [Allocator.allocate].
-  ///
-  /// Since this calls [sizeOf<T>] internally, an exception will be thrown if this
-  /// method is called with an @[unsized] type or before [Memory.init] was called.
-  Pointer<T> call<T extends NativeType>([int count = 1]) =>
-      allocate(sizeOf<T>() * count);
 }
 
 /// Extension on [Pointer] specialized for the type argument [Float].

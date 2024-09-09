@@ -1,13 +1,15 @@
+import 'dart:developer' as developer;
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
-
-import '../modules/module.dart';
-import '../modules/memory.dart';
-import '../modules/null_memory.dart';
-
-import '../internal/type_utils.dart';
-
-import '../../wasm_ffi_meta.dart';
+import '../ffi_utils/utf8.dart';
+import '../js_utils/wasm_interop.dart';
+import 'annotations.dart';
+import 'marshaller.dart';
+import 'memory.dart';
+import 'null_memory.dart';
+import 'type_utils.dart';
+export 'marshaller.dart' show sizeOf, initTypes;
 
 /// Represents a pointer into the native C memory corresponding to "NULL",
 /// e.g. a pointer with address 0.
@@ -18,24 +20,6 @@ import '../../wasm_ffi_meta.dart';
 /// Any other operation than comparing (e.g. calling [Pointer.cast])
 /// will result in exceptions.
 final Pointer<Never> nullptr = Pointer<Never>._null();
-
-/// Number of bytes used by native type T.
-///
-/// MUST NOT be called with types annoteted with @[unsized] or
-/// before [Memory.init()] was called or else an exception will be thrown.
-int sizeOf<T extends NativeType>() {
-  int? size;
-  if (isPointerType<T>()) {
-    size = sizeMap[IntPtr];
-  } else {
-    size = sizeMap[T];
-  }
-  if (size != null) {
-    return size;
-  } else {
-    throw ArgumentError('The type $T is not known!');
-  }
-}
 
 bool _isUnsizedType<T extends NativeType>() {
   return isNativeFunctionType<T>() || isVoidType<T>();
@@ -64,6 +48,14 @@ class Double extends NativeType {}
 @sealed
 @notConstructible
 class Float extends NativeType {}
+
+/// The C `int` type.
+///
+/// Int is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class Int extends NativeType {}
 
 /// Represents a native signed 8 bit integer in C.
 ///
@@ -96,6 +88,14 @@ class Int32 extends NativeType {}
 @sealed
 @notConstructible
 class Int64 extends NativeType {}
+
+/// The C `unsigned int` type.
+///
+/// Int is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class UnsignedInt extends NativeType {}
 
 /// Represents a native unsigned 8 bit integer in C.
 ///
@@ -137,6 +137,22 @@ class Uint64 extends NativeType {}
 @notConstructible
 class IntPtr extends NativeType {}
 
+/// Represents a native pointer-sized unsigned integer in C.
+///
+/// IntPtr is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class UintPtr extends NativeType {}
+
+/// Represents a native bool in C.
+///
+/// Bool is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
+@sealed
+@notConstructible
+class Bool extends NativeType {}
+
 /// Represents a function type in C.
 ///
 /// NativeFunction is not constructible in the Dart code and serves
@@ -165,20 +181,37 @@ class Opaque extends NativeType {}
 @unsized
 class Void extends NativeType {}
 
-/// Represents a char type in C
+/// Represents a Size type in C.
 ///
-/// Char is not constructible in the Dart code and serves
-/// purely as a marker in type signatures
+/// Size is not constructible in the Dart code and serves
+/// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Char extends Int8 {}
+@unsized
+class Size extends NativeType {}
+
+/// Miscellaneous types, defined as alias
+typedef Char = Int8;
+typedef UnsignedChar = Uint8;
+typedef Short = Int16;
+typedef UnsignedShort = Uint16;
+typedef Long = Int32;
+typedef UnsignedLong = Uint32;
+typedef LongLong = Int64;
+typedef UnsignedLongLong = Uint64;
+typedef WChar = Int32;
 
 /// Represents a pointer into the native C memory. Cannot be extended.
 @sealed
 class Pointer<T extends NativeType> extends NativeType {
-  //static Pointer<NativeFunction<T>> fromFunction<T extends Function>(Function f,
-  //       [Object? exceptionalReturn]) =>
-  //   throw UnimplementedError();
+  static Pointer<NativeFunction<T>> fromFunction<T extends Function>(Function f,
+      [Object? exceptionalReturn,
+      Memory? bindToMemory,
+      WasmTable? bindToTable]) {
+    Memory? memory = bindToMemory ?? Memory.global;
+    WasmTable? table = bindToTable ?? WasmTable.global;
+    return pointerFromFunctionImpl(f, table!, memory!);
+  }
 
   /// Access to the raw pointer value.
   final int address;
@@ -259,69 +292,157 @@ class Pointer<T extends NativeType> extends NativeType {
   }
 }
 
-/// Represents a dynamically loaded C library.
-class DynamicLibrary {
-  @extra
-  final Memory boundMemory;
+typedef AllowedFunc = JSAny Function(JSAny?, JSAny?, JSAny?, JSAny?);
 
-  /// Creates a instance based on the given module.
-  ///
-  /// While for each [DynamicLibrary] a [Memory] object is
-  /// created, the [Memory] objects share the backing memory if
-  /// they are created based on the same module.
-  ///
-  /// The [registerMode] parameter can be used to control if the
-  /// newly created [Memory] object should be registered as
-  /// [Memory.global].
-  @extra
-  factory DynamicLibrary.fromModule(Module module,
-      [MemoryRegisterMode registerMode =
-          MemoryRegisterMode.onlyIfGlobalNotSet]) {
-    Memory memory = createMemory(module);
-    switch (registerMode) {
-      case MemoryRegisterMode.yes:
-        Memory.global = memory;
-        break;
-      case MemoryRegisterMode.no:
-        break;
-      case MemoryRegisterMode.onlyIfGlobalNotSet:
-        Memory.global ??= memory;
-        break;
-    }
-    return DynamicLibrary._(memory);
-  }
+JSFunction _toWasmFunction(String signature, Function func) {
+  // This function is ported from the JavaScript that Emscripten emits. But more
+  // concise cause Dart > JavaScript.
 
-  DynamicLibrary._(this.boundMemory);
+  const typeCodes = {
+    'i': 0x7f, // i32
+    'j': 0x7e, // i64
+    'f': 0x7d, // f32
+    'd': 0x7c, // f64
+  };
 
-  /// Looks up a symbol in the DynamicLibrary and returns its address in memory.
-  ///
-  /// Throws an [ArgumentError] if it fails to lookup the symbol.
-  ///
-  /// While this method checks if the underyling wasm symbol is a actually
-  /// a function when you lookup a [NativeFunction]`<T>`, it does not check if
-  /// the return type and parameters of `T` match the wasm function.
-  Pointer<T> lookup<T extends NativeType>(String name) {
-    WasmSymbol symbol = symbolByName(boundMemory, name);
-    if (isNativeFunctionType<T>()) {
-      if (symbol is FunctionDescription) {
-        return Pointer<T>.fromAddress(symbol.tableIndex, boundMemory);
-      } else {
-        throw ArgumentError(
-            'Tried to look up $name as a function, but it seems it is NOT a function!');
+  // ignore: prefer_function_declarations_over_variables
+  final encodeArgTypes = (String types) => [
+        types.length,
+        ...types.runes.map((c) => typeCodes[String.fromCharCode(c)]!)
+      ];
+  // ignore: prefer_function_declarations_over_variables
+  final encodeSection =
+      (int type, List<int> content) => [type, content.length, ...content];
+
+  // The module is static, with the exception of the type section, which is
+  // generated based on the signature passed in.
+  final bytes = [
+    0x00, 0x61, 0x73, 0x6d, // magic ("\0asm")
+    0x01, 0x00, 0x00, 0x00, // version: 1
+    // id section
+    ...encodeSection(0x01, [
+      0x01, // count: 1
+      0x60, // form: func
+      // input arg types
+      ...encodeArgTypes(signature.substring(1)),
+      // output arg types
+      ...encodeArgTypes(signature[0] == 'v' ? '' : signature[0])
+    ]),
+    // import section: (import "e" "f" (func 0 (type 0)))
+    ...encodeSection(0x02, [0x01, 0x01, 0x65, 0x01, 0x66, 0x00, 0x00]),
+    // export section: (export "f" (func 0 (type 0)))
+    ...encodeSection(0x07, [0x01, 0x01, 0x66, 0x00, 0x00])
+  ];
+
+  // We can compile this wasm module synchronously because it is very small.
+  // This accepts an import (at "e.f"), that it reroutes to an export (at "f")
+  final func2 = func as AllowedFunc;
+  final instance = Instance.loadFromBinarySync(
+    Uint8List.fromList(bytes),
+    imports: {
+      'e': {
+        'f': func2.toJS,
       }
-    } else {
-      return Pointer<T>.fromAddress(symbol.address, boundMemory);
+    },
+  );
+
+  return instance.functions['f']!;
+}
+
+final Map<Function, Pointer> exportedFunctions = {};
+final Map<String, String> signatures = {};
+
+void initSignatures([int pointerSizeBytes = 4]) {
+  signatures[typeString<Float>()] = 'f';
+  signatures[typeString<Double>()] = 'd';
+  signatures[typeString<Int8>()] = 'i';
+  signatures[typeString<Uint8>()] = 'i';
+  signatures[typeString<Int16>()] = 'i';
+  signatures[typeString<Uint16>()] = 'i';
+  signatures[typeString<Int32>()] = 'i';
+  signatures[typeString<Uint32>()] = 'i';
+  signatures[typeString<Int64>()] = 'j';
+  signatures[typeString<Uint64>()] = 'j';
+  signatures[typeString<Utf8>()] = 'i';
+  signatures[typeString<Char>()] = 'i';
+  signatures[typeString<IntPtr>()] = pointerSizeBytes == 4 ? 'i' : 'j';
+  signatures[typeString<Opaque>()] = pointerSizeBytes == 4 ? 'i' : 'j';
+  signatures[typeString<Void>()] = 'v';
+}
+
+String _getWasmSignature<T extends Function>() {
+  List<String> dartSignature = typeString<T>().split('=>');
+  String retType = dartSignature.last.trim();
+  String argTypes = dartSignature.first.trim();
+  List<String> argTypesList =
+      argTypes.substring(1, argTypes.length - 1).split(', ');
+
+  developer.log('types: $retType $argTypesList');
+  developer.log('sigs: ${signatures.keys}');
+
+  return [retType, ...argTypesList].map((s) => signatures[s] ?? 'i').join();
+}
+
+//final Set<Function> theFunctions = {};
+
+final List<Function Function(Function)> callbackHelpers = [
+  (Function func) => () => func([]),
+  (Function func) => (arg1) => func([arg1]),
+  (Function func) => (arg1, arg2) => func([arg1, arg2]),
+  (Function func) => (arg1, arg2, arg3) => func([arg1, arg2, arg3]),
+  (Function func) => (arg1, arg2, arg3, arg4) => func([arg1, arg2, arg3, arg4]),
+  (Function func) =>
+      (arg1, arg2, arg3, arg4, arg5) => func([arg1, arg2, arg3, arg4, arg5]),
+  (Function func) => (arg1, arg2, arg3, arg4, arg5, arg6) =>
+      func([arg1, arg2, arg3, arg4, arg5, arg6]),
+];
+
+extension ListExtension<T> on List<T> {
+  Iterable<E> mapIndexed<E>(E Function(int index, T item) f) sync* {
+    for (var i = 0; i < length; i++) {
+      yield f(i, this[i]);
     }
   }
 }
 
-/// Manages memory on the native heap.
-abstract class Allocator {
-  /// Allocates byteCount bytes of memory on the native heap.
-  ///
-  /// The parameter `alignment` is ignored.
-  Pointer<T> allocate<T extends NativeType>(int byteCount, {int? alignment});
+Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
+    @DartRepresentationOf('T') Function func, WasmTable table, Memory memory) {
+  // TODO: garbage collect
 
-  /// Releases memory allocated on the native heap.
-  void free(Pointer<NativeType> pointer);
+  return exportedFunctions.putIfAbsent(func, () {
+    developer.log('marshal from: ${func.runtimeType} to $T');
+    String dartSignature = func.runtimeType.toString();
+    String argTypes = dartSignature.split('=>').first.trim();
+    List<String> argT = argTypes.substring(1, argTypes.length - 1).split(', ');
+    developer.log('arg types: $argT');
+    List<Function> marshallers = argTypes
+        .substring(1, argTypes.length - 1)
+        .split(', ')
+        .map((arg) => marshaller(arg))
+        .toList();
+
+    String wasmSignature = _getWasmSignature<T>();
+
+    developer.log('wasm sig: $wasmSignature');
+
+    // ignore: prefer_function_declarations_over_variables
+    Function wrapper1 = (List args) {
+      developer.log('wrapper of $T called with $args');
+      final marshalledArgs =
+          marshallers.mapIndexed((i, m) => m(args[i], memory)).toList();
+      developer.log('which is $marshalledArgs on $func');
+      Function.apply(func, marshalledArgs);
+      developer.log('done!');
+    };
+    Function wrapper2 = callbackHelpers[argT.length](wrapper1);
+
+    // theFunctions.add(wrapper);
+
+    final wasmFunc = _toWasmFunction(wasmSignature, wrapper2);
+    table.grow(1.toJS);
+    table.set((table.length.toDartInt - 1).toJS, wasmFunc);
+    developer.log('created callback with index ${table.length.toDartInt - 1}');
+    return Pointer<NativeFunction<T>>.fromAddress(
+        table.length.toDartInt - 1, memory);
+  }) as Pointer<NativeFunction<T>>;
 }
