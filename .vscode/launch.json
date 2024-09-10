@@ -3,17 +3,29 @@
   "configurations": [
     {
       "name": "example (ffi)",
+      "type": "dart",
+      "request": "launch",
       "program": "bin/example.dart",
       "cwd": "example",
-      "request": "launch",
-      "type": "dart",
     },
     {
       "name": "example (web)",
+      "type": "dart",
+      "request": "launch",
       "program": "web",
       "cwd": "example",
+    },
+    {
+      "name": "Bump Version",
+      "type": "dart",
       "request": "launch",
-      "type": "dart"
-    }
+      "program": "tool/bump_version.dart",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "patch",
+        "log",
+        "test",
+      ]
+    },
   ]
 }
