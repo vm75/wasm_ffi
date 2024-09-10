@@ -1,3 +1,6 @@
+## [1.0.1]
+* Minor code reorganization
+
 ## [1.0.0]
 * Added support for standalone wasm and added wrapper utility
 

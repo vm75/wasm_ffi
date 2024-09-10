@@ -3,8 +3,11 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:typed_data';
-import '../wasm_ffi.dart';
-import '../wasm_ffi_utils.dart';
+
+import '../ffi/allocation.dart';
+import '../ffi/extensions.dart';
+import '../ffi/types.dart';
+import 'allocation.dart';
 
 /// The contents of a native zero-terminated array of UTF-16 code units.
 ///

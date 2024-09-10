@@ -1,4 +1,4 @@
-import '../wasm_ffi.dart';
+import 'types.dart';
 
 /// Manages memory on the native heap.
 abstract class Allocator {

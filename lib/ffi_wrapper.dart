@@ -1,11 +1,12 @@
 library wasm_ffi;
 
-import '_wasm_ffi/helper.dart' if (dart.library.ffi) './_dart_ffi/helper.dart';
 import 'ffi_bridge.dart';
 import 'ffi_utils_bridge.dart';
+import 'src/_wasm_ffi/helper.dart'
+    if (dart.library.ffi) 'src/_dart_ffi/helper.dart';
 
-export 'package:wasm_ffi/_wasm_ffi/helper.dart'
-    if (dart.library.ffi) 'package:wasm_ffi/_dart_ffi/helper.dart';
+export 'src/_wasm_ffi/helper.dart'
+    if (dart.library.ffi) 'src/_dart_ffi/helper.dart';
 
 class FfiWrapper {
   final DynamicLibrary _library;

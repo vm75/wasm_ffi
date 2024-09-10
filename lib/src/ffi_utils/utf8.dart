@@ -5,8 +5,10 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+import '../ffi/allocation.dart';
 import '../ffi/annotations.dart';
-import '../wasm_ffi.dart';
+import '../ffi/extensions.dart';
+import '../ffi/types.dart';
 import 'allocation.dart';
 
 /// The contents of a native zero-terminated array of UTF-8 code units.

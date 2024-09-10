@@ -2,8 +2,11 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import '../ffi/allocation.dart';
+import '../ffi/extensions.dart';
 import '../ffi/memory.dart';
-import '../wasm_ffi.dart';
+import '../ffi/native_finalizer.dart';
+import '../ffi/types.dart';
 
 /// Uses global memory instance to manage memory.
 ///

@@ -5,8 +5,10 @@
 // Explicit arena used for managing resources.
 
 import 'dart:async';
-import '../wasm_ffi.dart';
-import '../wasm_ffi_utils.dart';
+
+import '../ffi/allocation.dart';
+import '../ffi/types.dart';
+import 'allocation.dart';
 
 /// An [Allocator] which frees all allocations at the same time.
 ///

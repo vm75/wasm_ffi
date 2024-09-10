@@ -2,9 +2,9 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import '../../js_utils/wasm_interop.dart' as interop;
-import '../../wasm_ffi.dart';
 import '../annotations.dart';
 import '../memory.dart';
+import '../types.dart';
 
 /// Base class to interact with the WebAssembly.
 ///
