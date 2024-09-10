@@ -1,4 +1,4 @@
-library wasm_ffi;
+library wasm_ffi_utils;
 
 export 'src/ffi_utils/allocation.dart' show calloc, malloc;
 export 'src/ffi_utils/arena.dart';

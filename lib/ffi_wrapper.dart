@@ -1,4 +1,4 @@
-library wasm_ffi;
+library wasm_ffi_wrapper;
 
 import 'ffi_bridge.dart';
 import 'ffi_utils_bridge.dart';
