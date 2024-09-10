@@ -1,4 +1,4 @@
-## 1.0.2
+## [1.0.2]
 * Changed library names
 
 ## [1.0.1]

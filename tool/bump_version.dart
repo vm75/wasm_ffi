@@ -154,7 +154,7 @@ List<String> getChangelogs() {
 }
 
 String changelogToString(Version version, List<String> changelogs,
-    {bool versionInBraces = false, String tab = '*'}) {
+    {bool versionInBraces = true, String tab = '*'}) {
   String log = versionInBraces ? '## [$version]\n' : '## $version\n';
   for (final changelog in changelogs) {
     log += '$tab $changelog\n';
