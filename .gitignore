@@ -10,3 +10,4 @@ pubspec.lock
 **/build/
 *.a
 *.out
+ref/

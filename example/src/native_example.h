@@ -11,6 +11,19 @@
 #define EXPORT __attribute__((visibility("default"))) __attribute__((used))
 #endif
 
+#pragma pack(1)
+struct TestStruct {
+  short s;
+  char a[5];
+  int i;
+};
+#pragma pack()
+
+union TestUnion {
+  struct TestStruct s;
+  char a[10];
+};
+
 /// library name
 EXPORT const char* getLibraryName(void);
 
@@ -28,5 +41,9 @@ EXPORT int boolSize(void);
 
 /// size of a pointer
 EXPORT int pointerSize(void);
+
+EXPORT struct TestStruct updateStruct(struct TestStruct s);
+
+EXPORT union TestUnion updateUnion(union TestUnion u);
 
 #endif

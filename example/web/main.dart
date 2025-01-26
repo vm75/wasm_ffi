@@ -1,4 +1,6 @@
 import 'package:example/example.dart';
+import 'package:example/native_example_bindings.dart';
+import 'package:wasm_ffi/src/ffi/types.dart';
 import 'package:web/web.dart';
 
 Element createKeyVal(String key, String value) {
@@ -24,6 +26,17 @@ Future<Element> runTests(String source, String name) async {
   container.append(createKeyVal('Size of Bool', runner.boolSize().toString()));
   container
       .append(createKeyVal('Size of Pointer', runner.pointerSize().toString()));
+  TestStruct s = TestStruct();
+  s.s = 1;
+  s.a[0] = 2 as Char;
+  s.a[1] = 3 as Char;
+  s.a[2] = 4 as Char;
+  s.a[3] = 5 as Char;
+  s.a[4] = 6 as Char;
+  s.i = 7;
+
+  container
+      .append(createKeyVal('TestStruct', runner.updateStruct(s).toString()));
   return container;
 }
 

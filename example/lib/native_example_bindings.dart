@@ -87,4 +87,68 @@ class NativeExampleBindings {
   late final _pointerSizePtr =
       _lookup<ffi.NativeFunction<ffi.Int Function()>>('pointerSize');
   late final _pointerSize = _pointerSizePtr.asFunction<int Function()>();
+
+  TestStruct updateStruct(
+    TestStruct s,
+  ) {
+    return _updateStruct(
+      s,
+    );
+  }
+
+  late final _updateStructPtr =
+      _lookup<ffi.NativeFunction<TestStruct Function(TestStruct)>>(
+          'updateStruct');
+  late final _updateStruct =
+      _updateStructPtr.asFunction<TestStruct Function(TestStruct)>();
+
+  TestUnion updateUnion(
+    TestUnion u,
+  ) {
+    return _updateUnion(
+      u,
+    );
+  }
+
+  late final _updateUnionPtr =
+      _lookup<ffi.NativeFunction<TestUnion Function(TestUnion)>>('updateUnion');
+  late final _updateUnion =
+      _updateUnionPtr.asFunction<TestUnion Function(TestUnion)>();
+}
+
+final class TestStruct extends ffi.Struct {
+  static final size = 10;
+  static final alignment = 1;
+  static final packed = true;
+  static final fields = [
+    {
+      'name': 's',
+      'type': 'int',
+      'offset': 0,
+      'size': 2,
+    },
+    {
+      'name': 'a',
+      'type': 'char[5]',
+      'offset': 2,
+      'size': 5,
+    },
+    {
+      'name': 'i',
+      'type': 'int',
+      'offset': 7,
+      'size': 4,
+    },
+  ];
+
+  int get s =>
+  ffi.Array<ffi.Char> a;
+  int i;
+}
+
+final class TestUnion extends ffi.Union {
+  external TestStruct s;
+
+  @ffi.Array.multi([10])
+  external ffi.Array<ffi.Char> a;
 }

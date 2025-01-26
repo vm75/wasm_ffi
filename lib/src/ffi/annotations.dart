@@ -43,6 +43,8 @@ class Unsized {
 const Unsized unsized = Unsized();
 
 class DartRepresentationOf {
+  final String nativeType;
+
   /// Represents the Dart type corresponding to a [NativeType].
   ///
   /// [Int8]                               -> [int]
@@ -60,5 +62,5 @@ class DartRepresentationOf {
   /// [NativeFunction]<T1 Function(T2, T3) -> S1 Function(S2, S3)
   ///    where DartRepresentationOf(Tn) -> Sn
   /// T extends Struct                  -> T
-  const DartRepresentationOf();
+  const DartRepresentationOf(this.nativeType);
 }

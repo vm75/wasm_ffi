@@ -33,4 +33,13 @@ class Example {
   int boolSize() => bindings.boolSize();
 
   int pointerSize() => bindings.pointerSize();
+
+  TestStruct updateStruct(TestStruct s) {
+    return using(
+      (Arena arena) {
+        return bindings.updateStruct(s);
+      },
+      library.allocator,
+    );
+  }
 }

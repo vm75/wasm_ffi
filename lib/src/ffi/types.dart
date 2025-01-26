@@ -29,9 +29,11 @@ bool _isUnsizedType<T extends NativeType>() {
 ///
 /// [NativeType]'s subtypes (except [Pointer]) are not constructible
 /// in the Dart code and serve purely as markers in type signatures.
-@sealed
+// @sealed
 @notConstructible
-class NativeType {}
+class NativeType {
+  const NativeType();
+}
 
 /// Represents a native 64 bit double in C.
 ///
@@ -39,7 +41,9 @@ class NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Double extends NativeType {}
+class Double extends NativeType {
+  const Double();
+}
 
 /// Represents a native 32 bit float in C.
 ///
@@ -47,7 +51,9 @@ class Double extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Float extends NativeType {}
+class Float extends NativeType {
+  const Float();
+}
 
 /// The C `int` type.
 ///
@@ -55,7 +61,9 @@ class Float extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Int extends NativeType {}
+class Int extends NativeType {
+  const Int();
+}
 
 /// Represents a native signed 8 bit integer in C.
 ///
@@ -63,7 +71,9 @@ class Int extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Int8 extends NativeType {}
+class Int8 extends NativeType {
+  const Int8();
+}
 
 /// Represents a native signed 16 bit integer in C.
 ///
@@ -71,7 +81,9 @@ class Int8 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Int16 extends NativeType {}
+class Int16 extends NativeType {
+  const Int16();
+}
 
 /// Represents a native signed 32 bit integer in C.
 ///
@@ -79,7 +91,9 @@ class Int16 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Int32 extends NativeType {}
+class Int32 extends NativeType {
+  const Int32();
+}
 
 /// Represents a native signed 64 bit integer in C.
 ///
@@ -87,7 +101,9 @@ class Int32 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Int64 extends NativeType {}
+class Int64 extends NativeType {
+  const Int64();
+}
 
 /// The C `unsigned int` type.
 ///
@@ -95,7 +111,9 @@ class Int64 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class UnsignedInt extends NativeType {}
+class UnsignedInt extends NativeType {
+  const UnsignedInt();
+}
 
 /// Represents a native unsigned 8 bit integer in C.
 ///
@@ -103,7 +121,9 @@ class UnsignedInt extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Uint8 extends NativeType {}
+class Uint8 extends NativeType {
+  const Uint8();
+}
 
 /// Represents a native unsigned 16 bit integer in C.
 ///
@@ -111,7 +131,9 @@ class Uint8 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Uint16 extends NativeType {}
+class Uint16 extends NativeType {
+  const Uint16();
+}
 
 /// Represents a native unsigned 32 bit integer in C.
 ///
@@ -119,7 +141,9 @@ class Uint16 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Uint32 extends NativeType {}
+class Uint32 extends NativeType {
+  const Uint32();
+}
 
 /// Represents a native unsigned 64 bit integer in C.
 ///
@@ -127,7 +151,9 @@ class Uint32 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Uint64 extends NativeType {}
+class Uint64 extends NativeType {
+  const Uint64();
+}
 
 /// Represents a native pointer-sized integer in C.
 ///
@@ -135,7 +161,9 @@ class Uint64 extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class IntPtr extends NativeType {}
+class IntPtr extends NativeType {
+  const IntPtr();
+}
 
 /// Represents a native pointer-sized unsigned integer in C.
 ///
@@ -143,7 +171,9 @@ class IntPtr extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class UintPtr extends NativeType {}
+class UintPtr extends NativeType {
+  const UintPtr();
+}
 
 /// Represents a native bool in C.
 ///
@@ -151,7 +181,9 @@ class UintPtr extends NativeType {}
 /// purely as marker in type signatures.
 @sealed
 @notConstructible
-class Bool extends NativeType {}
+class Bool extends NativeType {
+  const Bool();
+}
 
 /// Represents a function type in C.
 ///
@@ -160,7 +192,9 @@ class Bool extends NativeType {}
 @sealed
 @notConstructible
 @unsized
-class NativeFunction<T extends Function> extends NativeType {}
+class NativeFunction<T extends Function> extends NativeType {
+  const NativeFunction();
+}
 
 /// Opaque's subtypes represent opaque types in C.
 ///
@@ -170,7 +204,9 @@ class NativeFunction<T extends Function> extends NativeType {}
 /// purely as markers in type signatures.
 @noGeneric
 @notConstructible
-class Opaque extends NativeType {}
+class Opaque extends NativeType {
+  const Opaque();
+}
 
 /// Represents a void type in C.
 ///
@@ -179,7 +215,9 @@ class Opaque extends NativeType {}
 @sealed
 @notConstructible
 @unsized
-class Void extends NativeType {}
+class Void extends NativeType {
+  const Void();
+}
 
 /// Represents a Size type in C.
 ///
@@ -188,7 +226,9 @@ class Void extends NativeType {}
 @sealed
 @notConstructible
 @unsized
-class Size extends NativeType {}
+class Size extends NativeType {
+  const Size();
+}
 
 /// Miscellaneous types, defined as alias
 typedef Char = Int8;
@@ -406,10 +446,7 @@ extension ListExtension<T> on List<T> {
 }
 
 Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
-    /* TODO: @DartRepresentationOf('T')  */
-    Function func,
-    WasmTable table,
-    Memory memory) {
+    @DartRepresentationOf('T') Function func, WasmTable table, Memory memory) {
   // TODO: garbage collect
 
   return exportedFunctions.putIfAbsent(func, () {
@@ -449,4 +486,132 @@ Pointer<NativeFunction<T>> pointerFromFunctionImpl<T extends Function>(
     return Pointer<NativeFunction<T>>.fromAddress(
         table.length.toDartInt - 1, memory);
   }) as Pointer<NativeFunction<T>>;
+}
+
+class Struct extends Opaque {
+  const Struct();
+}
+
+class Union extends Opaque {
+  const Union();
+}
+
+final class _ArraySize<T extends NativeType> implements Array<T> {
+  final int? dimension1;
+  final int? dimension2;
+  final int? dimension3;
+  final int? dimension4;
+  final int? dimension5;
+  final List<int>? dimensions;
+  final bool variableLength;
+  const _ArraySize(
+    this.dimension1, [
+    this.dimension2,
+    this.dimension3,
+    this.dimension4,
+    this.dimension5,
+  ])  : dimensions = null,
+        variableLength = false;
+
+  const _ArraySize.multi(this.dimensions)
+      : dimension1 = null,
+        dimension2 = null,
+        dimension3 = null,
+        dimension4 = null,
+        dimension5 = null,
+        variableLength = false;
+  static const variableLengthLength = 0;
+
+  const _ArraySize.variable([
+    this.dimension2,
+    this.dimension3,
+    this.dimension4,
+    this.dimension5,
+  ])  : dimension1 = variableLengthLength,
+        dimensions = null,
+        variableLength = true;
+
+  const _ArraySize.variableMulti(List<int> nestedDimensions)
+      : dimensions = nestedDimensions, // Should be `[0, ...nestedDimensions]`.
+        dimension1 = null,
+        dimension2 = null,
+        dimension3 = null,
+        dimension4 = null,
+        dimension5 = null,
+        variableLength = true;
+
+  @override
+  // TODO: implement address
+  int get address => throw UnimplementedError();
+
+  @override
+  // TODO: implement boundMemory
+  Memory get boundMemory => throw UnimplementedError();
+
+  @override
+  Pointer<U> cast<U extends NativeType>() {
+    // TODO: implement cast
+    throw UnimplementedError();
+  }
+
+  @override
+  Pointer<T> elementAt(int index) {
+    // TODO: implement elementAt
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement size
+  int? get size => throw UnimplementedError();
+
+  @override
+  ByteData viewSingle(int index) {
+    // TODO: implement viewSingle
+    throw UnimplementedError();
+  }
+
+  @override
+  T operator [](int index) {
+    // TODO: implement operator []
+    throw UnimplementedError();
+  }
+
+  @override
+  void operator []=(int index, T value) {
+    // TODO: implement operator []
+    throw UnimplementedError();
+  }
+}
+
+class Array<T extends NativeType> extends Pointer<T> {
+  const factory Array(int dimension1,
+      [int dimension2,
+      int dimension3,
+      int dimension4,
+      int dimension5]) = _ArraySize<T>;
+  const factory Array.variable([
+    int dimension2,
+    int dimension3,
+    int dimension4,
+    int dimension5,
+  ]) = _ArraySize<T>.variable;
+  const factory Array.variableMulti(List<int> dimensions) =
+      _ArraySize<T>.variableMulti;
+  const factory Array.multi(List<int> dimensions) = _ArraySize<T>.multi;
+
+  T operator [](int index) {
+    // TODO: implement operator []
+    throw UnimplementedError();
+  }
+
+  void operator []=(int index, T value) {
+    // TODO: implement operator []
+    throw UnimplementedError();
+  }
+}
+
+final class Packed {
+  final int memberAlignment;
+
+  const Packed(this.memberAlignment);
 }

@@ -42,3 +42,15 @@ EXPORT int pointerSize(void)
 {
   return (int)sizeof(void*);
 }
+
+EXPORT struct TestStruct updateStruct(struct TestStruct s)
+{
+  s.s = 42;
+  return s;
+}
+
+EXPORT union TestUnion updateUnion(union TestUnion u)
+{
+  u.s.s = 42;
+  return u;
+}
