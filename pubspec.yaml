@@ -1,10 +1,10 @@
 name: wasm_ffi
 description: A wrapper for wasm which can be used as a drop-in replacement for dart:ffi for Web platform.
-version: 2.0.7
+version: 2.1.0
 repository: https://github.com/vm75/wasm_ffi
 
 environment:
-  sdk: ^3.5.1
+  sdk: ^3.6.0
 
 dependencies:
   ffi: ^2.1.3

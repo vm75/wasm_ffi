@@ -21,6 +21,8 @@ extension type EmscriptenModuleJs._(JSObject _) implements JSObject {
 
   external JSObject? get asm; // Emscripten <3.1.44
   external JSObject? get wasmExports; // Emscripten >=3.1.44
+  external JSPromise? get readyPromise;
+  external JSObject? get memory; // WebAssembly memory object
 
   // Must have an unnamed factory constructor with named arguments.
   external factory EmscriptenModuleJs({JSUint8Array? wasmBinary});
@@ -60,7 +62,7 @@ FunctionDescription _fromWasmFunction(String name, JSFunction func) {
   }
 }
 
-typedef EmscriptenModuleFunc = JSPromise<JSObject?> Function();
+typedef EmscriptenModuleFunc = JSObject? Function();
 
 /// Documentation is in `emscripten_module_stub.dart`!
 @extra
@@ -79,12 +81,34 @@ class EmscriptenModule extends Module {
       {void Function(EmscriptenModuleJs)? preinit}) async {
     final moduleFunction = _getModuleFunction(moduleName);
 
-    final module = await moduleFunction().toDart;
-    if (module != null && module is EmscriptenModuleJs) {
-      preinit?.call(module);
-      return EmscriptenModule._fromJs(module);
-    } else {
-      throw StateError('Could not instantiate an emscripten module!');
+    try {
+      var module = moduleFunction();
+
+      // Handle nested promises from newer emscripten (async function returns Promise)
+      // Keep unwrapping until we get the actual module object
+      // Both old and new emscripten only resolve promises after full initialization
+
+      // Check if it's a thenable (has a 'then' method) and unwrap it
+      while (module != null) {
+        final then = (module).getProperty('then'.toJS);
+        if (then != null && then is JSFunction) {
+          // It's a thenable, await it
+          module = await (module as JSPromise).toDart as JSObject?;
+        } else {
+          // Not a promise, break out
+          break;
+        }
+      }
+
+      if (module != null && module is EmscriptenModuleJs) {
+        preinit?.call(module);
+        return EmscriptenModule._fromJs(module);
+      } else {
+        throw StateError(
+            'Could not instantiate an emscripten module! Got: ${module.runtimeType}');
+      }
+    } catch (e) {
+      throw StateError('Could not instantiate an emscripten module: $e');
     }
   }
 
@@ -93,6 +117,7 @@ class EmscriptenModule extends Module {
   final _Malloc _malloc;
   final _Free _free;
   final WasmTable? _indirectFunctionTable;
+  final JSObject? _memory;
 
   @override
   List<WasmSymbol> get exports => _exports;
@@ -101,7 +126,7 @@ class EmscriptenModule extends Module {
   WasmTable? get indirectFunctionTable => _indirectFunctionTable;
 
   EmscriptenModule._(this._emscriptenModuleJs, this._exports,
-      this._indirectFunctionTable, this._malloc, this._free);
+      this._indirectFunctionTable, this._malloc, this._free, this._memory);
 
   factory EmscriptenModule._fromJs(EmscriptenModuleJs module) {
     final asm = module.wasmExports ?? module.asm;
@@ -112,6 +137,7 @@ class EmscriptenModule extends Module {
       final List<WasmSymbol> exports = [];
       final List entries = WrappedJSObject.entries(asm).toDart;
       WasmTable? indirectFunctionTable;
+      JSObject? memory;
       // if (entries is List<Object>) {
       for (dynamic entry in entries) {
         if (entry is! List) {
@@ -158,8 +184,11 @@ class EmscriptenModule extends Module {
         } else if (WasmTable.isInstance(value as WasmTable) &&
             entry.first as String == '__indirect_function_table') {
           indirectFunctionTable = value as WasmTable;
-        } else if (entry.first as String == 'memory') {
-          // ignore memory object
+        } else if (entry.first as String == 'memory' ||
+            entry.first as String == 'b') {
+          // memory is often at index 'b'
+          // Store the memory object for heap access
+          memory = value as JSObject;
         } else {
           // ignore unknown entries
           // throw StateError(
@@ -173,12 +202,13 @@ class EmscriptenModule extends Module {
         throw StateError('Module does not export the free function!');
       }
       return EmscriptenModule._(
-          module, exports, indirectFunctionTable, malloc, free);
+          module, exports, indirectFunctionTable, malloc, free, memory);
     } else {
       _Malloc? malloc;
       _Free? free;
       final List<WasmSymbol> exports = [];
       WasmTable? indirectFunctionTable;
+      JSObject? memory;
       final entries = WrappedJSObject.entries(module).toDart;
       for (final jsEntry in entries) {
         if (jsEntry == null || jsEntry is! List) {
@@ -219,7 +249,7 @@ class EmscriptenModule extends Module {
         throw StateError('Module does not export the free function!');
       }
       return EmscriptenModule._(
-          module, exports, indirectFunctionTable, malloc, free);
+          module, exports, indirectFunctionTable, malloc, free, memory);
     }
   }
 
@@ -229,12 +259,34 @@ class EmscriptenModule extends Module {
   @override
   ByteBuffer get heap => _getHeap();
   ByteBuffer _getHeap() {
+    // Try HEAPU8 first (older emscripten)
     final Uint8List? h = _emscriptenModuleJs.HEAPU8?.toDart;
     if (h != null) {
       return h.buffer;
-    } else {
-      throw StateError('Unexpected memory error!');
     }
+
+    // Try accessing through stored memory object (newer emscripten)
+    if (_memory != null) {
+      // Try to get the buffer from the WebAssembly memory
+      final buffer = _memory.getProperty('buffer'.toJS);
+      if (buffer != null && buffer is JSArrayBuffer) {
+        final uint8Array = JSUint8Array(buffer);
+        return uint8Array.toDart.buffer;
+      }
+    }
+
+    // Try accessing through module memory object
+    final memory = _emscriptenModuleJs.memory;
+    if (memory != null) {
+      // Try to get the buffer from the WebAssembly memory
+      final buffer = memory.getProperty('buffer'.toJS);
+      if (buffer != null && buffer is JSArrayBuffer) {
+        final uint8Array = JSUint8Array(buffer);
+        return uint8Array.toDart.buffer;
+      }
+    }
+
+    throw StateError('Unexpected memory error!');
   }
 
   @override

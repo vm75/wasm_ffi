@@ -1,3 +1,6 @@
+## [2.1.0]
+* Fixed support for wasm with emscripten js glue
+
 ## [2.0.7]
 * Remove pubspec.lock
 

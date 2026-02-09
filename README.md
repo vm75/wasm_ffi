@@ -95,6 +95,83 @@ The generated wasm file needs all exported function. To ensure that, one of the 
 * Use EMSCRIPTEN_KEEPALIVE annotation on all exported functions
 * Define EXPORTED_FUNCTIONS when compiling the wasm
 
+## Building WASM with Emscripten
+
+This section provides detailed instructions on how to create WASM modules using Emscripten (emcc) for both Emscripten and standalone configurations. Emscripten generates JavaScript glue code along with WASM, while standalone produces pure WASM without JavaScript.
+
+### Prerequisites
+
+- Install Emscripten: Follow the [official installation guide](https://emscripten.org/docs/getting_started/downloads.html).
+- Ensure `emcc` is in your PATH.
+
+### Emscripten WASM (with JavaScript glue)
+
+Emscripten WASM is suitable for web applications where you need JavaScript interop and access to browser APIs. It generates both a `.js` file (containing the module and runtime) and a `.wasm` file.
+
+#### Basic Command
+
+```bash
+emcc -o output.js input.c \
+  -s MODULARIZE=1 \
+  -s 'EXPORT_NAME="MyModule"' \
+  -s ALLOW_MEMORY_GROWTH=1 \
+  -s EXPORTED_RUNTIME_METHODS=HEAPU8 \
+  -s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]
+```
+
+#### Key Options Explained
+
+- `-s MODULARIZE=1`: Wraps the generated code in a function, making it a module that can be instantiated multiple times.
+- `-s 'EXPORT_NAME="MyModule"'`: Specifies the name of the exported module (replace `"MyModule"` with your desired name).
+- `-s ALLOW_MEMORY_GROWTH=1`: Allows the WASM memory to grow dynamically as needed.
+- `-s EXPORTED_RUNTIME_METHODS=HEAPU8`: **Important**: Exports `HEAPU8`, a Uint8Array view of the WASM memory, allowing direct access to the memory buffer from JavaScript. This is crucial for `wasm_ffi` to interact with the WASM memory.
+- `-s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]`: Lists the functions to export from the WASM module. Prefix C function names with `_`. Include `_malloc` and `_free` if your code uses dynamic memory allocation.
+
+#### Additional Optimization Options
+
+For production builds, add these flags:
+
+```bash
+-Oz -fno-exceptions -fno-rtti -fno-stack-protector -ffunction-sections -fdata-sections -fno-math-errno -DNDEBUG
+```
+
+For debugging:
+
+```bash
+-g3 --profiling-funcs -s ASSERTIONS=1 -fsanitize=address
+```
+
+### Standalone WASM
+
+Standalone WASM produces a pure `.wasm` file without JavaScript glue code. It's suitable for environments where you have direct WASM support without JavaScript interop.
+
+#### Basic Command
+
+```bash
+emcc -o output.wasm input.c \
+  -s STANDALONE_WASM=1 \
+  -s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]
+```
+
+#### Key Options Explained
+
+- `-s STANDALONE_WASM=1`: Generates standalone WASM without Emscripten runtime.
+- `-s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]`: Same as above, lists exported functions.
+
+#### Additional Options
+
+Same optimization and debugging flags as Emscripten can be used.
+
+### Example from this Repository
+
+See the [example/Makefile](example/Makefile) for a complete build setup that generates both Emscripten and standalone WASM.
+
+### Notes
+
+- Always include `_malloc` and `_free` in `EXPORTED_FUNCTIONS` if your C code uses dynamic memory allocation.
+- For Emscripten, `HEAPU8` export is essential for `wasm_ffi` to access the WASM memory.
+- Test your builds in the target environment (web browser for Emscripten, WASM runtime for standalone).
+
 ---
 
 Contributions are welcome! 🚀

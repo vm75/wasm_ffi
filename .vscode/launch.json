@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "example",
+      "name": "Dart web example",
       "type": "dart",
       "request": "launch",
       "program": "web",
       "cwd": "example",
     },
     {
-      "name": "flutter example",
+      "name": "Flutter example",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",

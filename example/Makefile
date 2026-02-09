@@ -18,8 +18,8 @@ endif
 COMPILED_EXPORTS="EXPORTED_FUNCTIONS=[\"_malloc\", \"_free\"]"
 
 clean:
-	rm -rf assets/standalone/*
-	rm -rf assets/emscripten/*
+	rm -rf web/assets/standalone/*
+	rm -rf web/assets/emscripten/*
 
 lib/native_example_bindings.dart: $(DEPS)
 	dart run ffigen --config ffigen.yaml && sed -i "s#'dart:ffi'#'package:wasm_ffi/ffi.dart'#g" $@
@@ -34,6 +34,7 @@ web/assets/emscripten/native_example.js: $(DEPS) lib/native_example_bindings.dar
 	emcc -o web/assets/emscripten/native_example.js $(COMPILER_OPTIONS) $(LINKER_OPTIONS) \
 		$(SRC) \
 		-s MODULARIZE=1 -s 'EXPORT_NAME="native_example"' -s ALLOW_MEMORY_GROWTH=1 \
+		-s EXPORTED_RUNTIME_METHODS=HEAPU8 \
 		-s $(COMPILED_EXPORTS)
 
 run:
