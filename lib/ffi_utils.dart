@@ -2,7 +2,7 @@
 /// converting between Dart strings and C strings encoded with UTF-8 and UTF-16.
 ///
 /// This is quivalent to the `package:ffi/ffi.dart` package for the web platform.
-library wasm_ffi_utils;
+library;
 
 export 'src/ffi_utils/allocation.dart' show calloc, malloc;
 export 'src/ffi_utils/arena.dart';

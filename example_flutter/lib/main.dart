@@ -13,9 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Wasm FFI Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomePage(),
     );
   }
@@ -27,9 +25,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('wasm-ffi tests'),
-      ),
+      appBar: AppBar(title: const Text('wasm-ffi tests')),
       body: const Column(
         children: [
           Expanded(
@@ -72,6 +68,7 @@ class _AsyncRunnerWidgetState extends State<AsyncRunnerWidget> {
       'Size of Int': runner.intSize().toString(),
       'Size of Bool': runner.boolSize().toString(),
       'Size of Pointer': runner.pointerSize().toString(),
+      'Static Init Check': runner.staticInitCheck().toString(),
     };
   }
 
@@ -107,10 +104,12 @@ class _AsyncRunnerWidgetState extends State<AsyncRunnerWidget> {
             if (_data.isEmpty)
               const Center(child: CircularProgressIndicator())
             else
-              ..._data.entries.map((entry) => Text(
-                    '${entry.key}: ${entry.value}',
-                    style: const TextStyle(fontSize: 16),
-                  )),
+              ..._data.entries.map(
+                (entry) => Text(
+                  '${entry.key}: ${entry.value}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
           ],
         ),
       ),

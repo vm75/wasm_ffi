@@ -1,3 +1,6 @@
+## [2.2.0]
+* Add c++ init support, fix examples, linter warnings, readmes
+
 ## [2.1.1]
 * Upgrade dart/flutter package
 

@@ -1,7 +1,7 @@
 /// Foreign Function Interface for interoperability with the C programming language.
 ///
 /// This is quivalent to the `dart:ffi` package for the web platform.
-library wasm_ffi;
+library;
 
 export 'src/ffi/allocation.dart';
 export 'src/ffi/dynamic_library.dart';

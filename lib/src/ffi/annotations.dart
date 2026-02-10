@@ -56,8 +56,8 @@ class DartRepresentationOf {
   /// [IntPtr]                             -> [int]
   /// [Double]                             -> [double]
   /// [Float]                              -> [double]
-  /// [Pointer]<T>                         -> [Pointer]<T>
-  /// [NativeFunction]<T1 Function(T2, T3) -> S1 Function(S2, S3)
+  /// [Pointer]&lt;T&gt;                   -> [Pointer]&lt;T&gt;
+  /// [NativeFunction]&lt;T1 Function(T2, T3)&gt; -> S1 Function(S2, S3)
   ///    where DartRepresentationOf(Tn) -> Sn
   /// T extends Struct                  -> T
   const DartRepresentationOf();

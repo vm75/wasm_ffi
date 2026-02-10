@@ -81,7 +81,9 @@ bool _isLoaded(Element head, String url) {
     final Element? element = head.children.item(i);
     if (element != null) {
       final src = element.getProperty('src'.toJS);
-      if (src is JSString && src.toDart.endsWith(url)) {
+      if (src != null &&
+          src.isA<JSString>() &&
+          (src as JSString).toDart.endsWith(url)) {
         return true;
       }
     }

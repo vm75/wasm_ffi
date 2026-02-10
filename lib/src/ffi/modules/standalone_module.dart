@@ -22,17 +22,21 @@ class StandaloneWasmModule extends Module {
   }
 
   FunctionDescription _fromWasmFunction(
-      String name, JSFunction func, int index) {
+    String name,
+    JSFunction func,
+    int index,
+  ) {
     final funcDesc = func as WrappedJSFunction;
 
     if (funcDesc.name != null) {
       final length = funcDesc.length;
       if (length != null) {
         return FunctionDescription(
-            tableIndex: index,
-            name: name,
-            function: func,
-            argumentCount: length.toDartInt);
+          tableIndex: index,
+          name: name,
+          function: func,
+          argumentCount: length.toDartInt,
+        );
       }
     }
     throw ArgumentError('$name does not seem to be a function symbol!');
@@ -48,8 +52,8 @@ class StandaloneWasmModule extends Module {
   @override
   void free(int pointer) {
     final func = _instance.functions['free'];
-    if (func is Function) {
-      (func! as Function).call(pointer);
+    if (func != null) {
+      func.callAsFunction(pointer.toJS);
     }
   }
 
@@ -63,9 +67,9 @@ class StandaloneWasmModule extends Module {
   @override
   int malloc(int size) {
     final func = _instance.functions['malloc'];
-    if (func is Function) {
-      final resp = (func! as Function).call(size) as int;
-      return resp;
+    if (func != null) {
+      final resp = func.callAsFunction(size.toJS) as JSNumber?;
+      return resp?.toDartInt ?? -1;
     }
     return -1;
   }
@@ -85,7 +89,8 @@ class StandaloneWasmModule extends Module {
         return Pointer<T>.fromAddress(symbol.tableIndex, memory);
       } else {
         throw ArgumentError(
-            'Tried to look up $name as a function, but it seems it is NOT a function!');
+          'Tried to look up $name as a function, but it seems it is NOT a function!',
+        );
       }
     } else {
       return Pointer<T>.fromAddress(symbol.address, memory);
@@ -99,7 +104,9 @@ class StandaloneWasmModule extends Module {
 
   @override
   F lookupFunction<T extends Function, F extends Function>(
-      String name, Memory memory) {
+    String name,
+    Memory memory,
+  ) {
     return _instance.functions[name]! as F;
   }
 }

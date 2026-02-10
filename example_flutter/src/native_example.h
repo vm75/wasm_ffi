@@ -11,6 +11,10 @@
 #define EXPORT __attribute__((visibility("default"))) __attribute__((used))
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// library name
 EXPORT const char* getLibraryName(void);
 
@@ -28,5 +32,12 @@ EXPORT int boolSize(void);
 
 /// size of a pointer
 EXPORT int pointerSize(void);
+
+/// check if static initialization happened
+EXPORT int static_init_check(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

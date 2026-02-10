@@ -1,3 +1,4 @@
+import 'dart:js_interop';
 import 'dart:typed_data';
 import 'annotations.dart';
 import 'exceptions.dart';
@@ -20,11 +21,12 @@ extension NativeFunctionPointer<NF extends Function>
   DF asFunction<DF extends Function>() {
     // ignore: prefer_final_locals
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
-    if (symbol is FunctionDescription && symbol.function is Function) {
+    if (symbol is FunctionDescription && symbol.function.isA<JSFunction>()) {
       return marshall<NF, DF>(symbol.function as Function, boundMemory);
     } else {
       throw ArgumentError(
-          'No function at address $address was found (but a global symbol)!');
+        'No function at address $address was found (but a global symbol)!',
+      );
     }
   }
 }
@@ -255,10 +257,11 @@ extension PointerPointer<T extends NativeType> on Pointer<Pointer<T>> {
 
   /// The pointer at `address + size * index`.
   Pointer<T> operator [](int index) => Pointer<T>.fromAddress(
-      is64Bit
-          ? viewSingle(index).getUint64(0, Memory.endianess)
-          : viewSingle(index).getUint32(0, Memory.endianess),
-      boundMemory);
+    is64Bit
+        ? viewSingle(index).getUint64(0, Memory.endianess)
+        : viewSingle(index).getUint32(0, Memory.endianess),
+    boundMemory,
+  );
   void operator []=(int index, Pointer<T> value) => is64Bit
       ? viewSingle(index).setUint64(0, value.address, Memory.endianess)
       : viewSingle(index).setUint32(0, value.address, Memory.endianess);

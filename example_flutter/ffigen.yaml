@@ -1,0 +1,9 @@
+# Run with `dart run ffigen --config ffigen.yaml`.
+name: NativeExampleBindings
+description: Bindings for Native Example.
+output: "lib/native_example_bindings.dart"
+headers:
+  entry-points:
+    - "src/native_example.h"
+  include-directives:
+    - "src/native_example.h"

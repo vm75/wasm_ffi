@@ -7,6 +7,7 @@ import '../js_utils/inject_js.dart';
 import '../js_utils/wasm_interop.dart' as interop;
 import 'allocation.dart';
 import 'annotations.dart';
+import 'extensions.dart';
 import 'marshaller.dart';
 import 'memory.dart';
 import 'modules/emscripten_module.dart';
@@ -169,6 +170,19 @@ class DynamicLibrary {
         Memory.global ??= memory;
         interop.WasmTable.global ??= module.indirectFunctionTable;
         break;
+    }
+
+    if (module is StandaloneWasmModule) {
+      try {
+        module
+            .lookup<NativeFunction<Void Function()>>(
+              '__wasm_call_ctors',
+              memory,
+            )
+            .asFunction<void Function()>()();
+      } catch (_) {
+        // Ignore if not present
+      }
     }
 
     return DynamicLibrary._(module, memory);

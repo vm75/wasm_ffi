@@ -1,5 +1,5 @@
 @JS()
-library emscripten_module;
+library;
 
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
@@ -34,8 +34,21 @@ String _adu(WasmSymbol? original, WasmSymbol? tried) =>
     '\r\nOriginal: $original'
     '\r\nTried: $tried';
 
-typedef _Malloc = int Function(int size);
-typedef _Free = void Function(int address);
+// typedef _Malloc = int Function(int size);
+// typedef _Free = void Function(int address);
+
+extension type _Malloc(JSFunction _) implements JSFunction {
+  int call(int size) {
+    final JSAny? result = callAsFunction(null, size.toJS);
+    return result == null ? -1 : (result as JSNumber).toDartInt;
+  }
+}
+
+extension type _Free(JSFunction _) implements JSFunction {
+  void call(int address) {
+    callAsFunction(null, address.toJS);
+  }
+}
 
 FunctionDescription _fromWasmFunction(String name, JSFunction func) {
   final funcDesc = func as WrappedJSFunction;
@@ -47,10 +60,11 @@ FunctionDescription _fromWasmFunction(String name, JSFunction func) {
       final int? argCount = funcDesc.length?.toDartInt;
       if (argCount != null) {
         return FunctionDescription(
-            tableIndex: index,
-            name: name,
-            function: func,
-            argumentCount: argCount);
+          tableIndex: index,
+          name: name,
+          function: func,
+          argumentCount: argCount,
+        );
       } else {
         throw ArgumentError('$name does not seem to be a function symbol!');
       }
@@ -62,14 +76,19 @@ FunctionDescription _fromWasmFunction(String name, JSFunction func) {
   }
 }
 
-typedef EmscriptenModuleFunc = JSObject? Function();
+extension type EmscriptenModuleFunc(JSFunction _) implements JSFunction {
+  JSObject? call() {
+    return callAsFunction() as JSObject?;
+  }
+}
 
 /// Documentation is in `emscripten_module_stub.dart`!
 @extra
 class EmscriptenModule extends Module {
   static EmscriptenModuleFunc _getModuleFunction(String moduleName) {
-    final JSFunction? moduleFunction =
-        globalContext.getProperty(moduleName.toJS);
+    final JSFunction? moduleFunction = globalContext.getProperty(
+      moduleName.toJS,
+    );
     if (moduleFunction == null) {
       throw StateError('Could not find a emscripten module named $moduleName');
     }
@@ -77,8 +96,10 @@ class EmscriptenModule extends Module {
   }
 
   /// Documentation is in `emscripten_module_stub.dart`!
-  static Future<EmscriptenModule> compile(String moduleName,
-      {void Function(EmscriptenModuleJs)? preinit}) async {
+  static Future<EmscriptenModule> compile(
+    String moduleName, {
+    void Function(EmscriptenModuleJs)? preinit,
+  }) async {
     final moduleFunction = _getModuleFunction(moduleName);
 
     try {
@@ -91,7 +112,7 @@ class EmscriptenModule extends Module {
       // Check if it's a thenable (has a 'then' method) and unwrap it
       while (module != null) {
         final then = (module).getProperty('then'.toJS);
-        if (then != null && then is JSFunction) {
+        if (then != null && then.isA<JSFunction>()) {
           // It's a thenable, await it
           module = await (module as JSPromise).toDart as JSObject?;
         } else {
@@ -100,12 +121,13 @@ class EmscriptenModule extends Module {
         }
       }
 
-      if (module != null && module is EmscriptenModuleJs) {
-        preinit?.call(module);
-        return EmscriptenModule._fromJs(module);
+      if (module != null && module.isA<JSObject>()) {
+        preinit?.call(module as EmscriptenModuleJs);
+        return EmscriptenModule._fromJs(module as EmscriptenModuleJs);
       } else {
         throw StateError(
-            'Could not instantiate an emscripten module! Got: ${module.runtimeType}');
+          'Could not instantiate an emscripten module! Got: ${module.runtimeType}',
+        );
       }
     } catch (e) {
       throw StateError('Could not instantiate an emscripten module: $e');
@@ -125,8 +147,14 @@ class EmscriptenModule extends Module {
   @override
   WasmTable? get indirectFunctionTable => _indirectFunctionTable;
 
-  EmscriptenModule._(this._emscriptenModuleJs, this._exports,
-      this._indirectFunctionTable, this._malloc, this._free, this._memory);
+  EmscriptenModule._(
+    this._emscriptenModuleJs,
+    this._exports,
+    this._indirectFunctionTable,
+    this._malloc,
+    this._free,
+    this._memory,
+  );
 
   factory EmscriptenModule._fromJs(EmscriptenModuleJs module) {
     final asm = module.wasmExports ?? module.asm;
@@ -147,24 +175,27 @@ class EmscriptenModule extends Module {
         if (value == null) {
           throw StateError('Error: Unexpected null value in for entry $entry');
         }
-        // TODO: Not sure if `value` can ever be `int` directly. I only
+        // Not sure if `value` can ever be `int` directly. I only
         // observed it being WebAssembly.Global for globals.
-        if (value is int ||
-            (WasmGlobal.isInstance(value as WasmGlobal) &&
-                value.value is int)) {
-          final int address =
-              (value is int) ? value : ((value as WasmGlobal).value as int);
-          final Global g =
-              Global(address: address, name: entry.first as String);
+        if (value is int || (WasmGlobal.isInstance(value as WasmGlobal))) {
+          final int address = (value is int)
+              ? value
+              : ((value as WasmGlobal).value.toDartInt);
+          final Global g = Global(
+            address: address,
+            name: entry.first as String,
+          );
           if (knownAddresses.containsKey(address) &&
               knownAddresses[address] is! Global) {
             throw StateError(_adu(knownAddresses[address], g));
           }
           knownAddresses[address] = g;
           exports.add(g);
-        } else if (value is Function) {
-          final FunctionDescription description =
-              _fromWasmFunction(entry.first as String, value as JSFunction);
+        } else if (value.isA<JSFunction>()) {
+          final FunctionDescription description = _fromWasmFunction(
+            entry.first as String,
+            value as JSFunction,
+          );
           // It might happen that there are two different c functions that do nothing else than calling the same underlying c function
           // In this case, a compiler might substitute both functions with the underlying c function
           // So we got two functions with different names at the same table index
@@ -172,7 +203,8 @@ class EmscriptenModule extends Module {
           if (knownAddresses.containsKey(description.tableIndex) &&
               knownAddresses[description.tableIndex] is! FunctionDescription) {
             throw StateError(
-                _adu(knownAddresses[description.tableIndex], description));
+              _adu(knownAddresses[description.tableIndex], description),
+            );
           }
           knownAddresses[description.tableIndex] = description;
           exports.add(description);
@@ -202,7 +234,13 @@ class EmscriptenModule extends Module {
         throw StateError('Module does not export the free function!');
       }
       return EmscriptenModule._(
-          module, exports, indirectFunctionTable, malloc, free, memory);
+        module,
+        exports,
+        indirectFunctionTable,
+        malloc,
+        free,
+        memory,
+      );
     } else {
       _Malloc? malloc;
       _Free? free;
@@ -211,13 +249,13 @@ class EmscriptenModule extends Module {
       JSObject? memory;
       final entries = WrappedJSObject.entries(module).toDart;
       for (final jsEntry in entries) {
-        if (jsEntry == null || jsEntry is! List) {
+        if (jsEntry == null || !jsEntry.isA<JSArray>()) {
           throw StateError('Unexpected entry in entries(Module[])!');
         }
-        final entry = jsEntry as List;
-        var name = entry.first as String;
+        final entry = (jsEntry as JSArray).toDart;
+        var name = (entry.first! as JSString).toDart;
         final value = entry.last;
-        if (value is Function) {
+        if (value != null && value.isA<JSFunction>()) {
           // if name starts with _ , exclude first character
           if (!name.startsWith('_')) {
             continue;
@@ -249,7 +287,13 @@ class EmscriptenModule extends Module {
         throw StateError('Module does not export the free function!');
       }
       return EmscriptenModule._(
-          module, exports, indirectFunctionTable, malloc, free, memory);
+        module,
+        exports,
+        indirectFunctionTable,
+        malloc,
+        free,
+        memory,
+      );
     }
   }
 
@@ -269,8 +313,8 @@ class EmscriptenModule extends Module {
     if (_memory != null) {
       // Try to get the buffer from the WebAssembly memory
       final buffer = _memory.getProperty('buffer'.toJS);
-      if (buffer != null && buffer is JSArrayBuffer) {
-        final uint8Array = JSUint8Array(buffer);
+      if (buffer != null && buffer.isA<JSArrayBuffer>()) {
+        final uint8Array = JSUint8Array(buffer as JSArrayBuffer);
         return uint8Array.toDart.buffer;
       }
     }
@@ -280,8 +324,8 @@ class EmscriptenModule extends Module {
     if (memory != null) {
       // Try to get the buffer from the WebAssembly memory
       final buffer = memory.getProperty('buffer'.toJS);
-      if (buffer != null && buffer is JSArrayBuffer) {
-        final uint8Array = JSUint8Array(buffer);
+      if (buffer != null && buffer.isA<JSArrayBuffer>()) {
+        final uint8Array = JSUint8Array(buffer as JSArrayBuffer);
         return uint8Array.toDart.buffer;
       }
     }
@@ -307,7 +351,8 @@ class EmscriptenModule extends Module {
         return Pointer<T>.fromAddress(symbol.tableIndex, memory);
       } else {
         throw ArgumentError(
-            'Tried to look up $name as a function, but it seems it is NOT a function!');
+          'Tried to look up $name as a function, but it seems it is NOT a function!',
+        );
       }
     } else {
       return Pointer<T>.fromAddress(symbol.address, memory);
@@ -321,8 +366,11 @@ class EmscriptenModule extends Module {
 
   @override
   F lookupFunction<T extends Function, F extends Function>(
-      String name, Memory memory) {
+    String name,
+    Memory memory,
+  ) {
     return lookup<NativeFunction<T>>(name, memory).asFunction<F>();
   }
+
   // _EmscriptenModuleJs get module => _emscriptenModuleJs;
 }

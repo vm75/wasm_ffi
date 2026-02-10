@@ -4,12 +4,13 @@ version:
 	bash ./tool/update-version.sh
 
 build:
-	cp -f example/src/* example_flutter/src/
-	cd example && make build
-	cp -rf example/web/assets/* example_flutter/assets/
+	cd example_flutter && make clean && make build
 
-run:
+run-dart:
 	cd example && make run
+
+run-flutter:
+	cd example_flutter && make run
 
 test:
 	dart run build_runner test -- -p chrome
