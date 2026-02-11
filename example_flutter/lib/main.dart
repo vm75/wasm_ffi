@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'example.dart';
+import 'example_library_wrapper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -61,7 +61,9 @@ class _AsyncRunnerWidgetState extends State<AsyncRunnerWidget> {
 
   // Simulated asynchronous runner.
   Future<Map<String, String>> fetchValues() async {
-    final runner = await Example.create('assets/${widget.wasmPath}');
+    final runner = await ExampleLibraryWrapper.create(
+      'assets/${widget.wasmPath}',
+    );
     return {
       'Library Name': runner.getLibraryName(),
       'Hello String': runner.hello(widget.name),

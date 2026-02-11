@@ -4,15 +4,16 @@ import 'package:wasm_ffi/ffi.dart';
 import 'package:wasm_ffi/ffi_utils.dart';
 import 'native_example_bindings.dart';
 
-class Example {
+class ExampleLibraryWrapper {
   final DynamicLibrary library;
   final NativeExampleBindings bindings;
 
-  Example._(this.library) : bindings = NativeExampleBindings(library);
+  ExampleLibraryWrapper._(this.library)
+    : bindings = NativeExampleBindings(library);
 
-  static Future<Example> create(String libPath) async {
+  static Future<ExampleLibraryWrapper> create(String libPath) async {
     final library = await DynamicLibrary.open(libPath);
-    return Example._(library);
+    return ExampleLibraryWrapper._(library);
   }
 
   String getLibraryName() =>

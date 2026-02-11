@@ -1,4 +1,4 @@
-import 'package:example/example.dart';
+import 'package:example/example_library_wrapper.dart';
 import 'package:web/web.dart';
 
 Element createKeyVal(String key, String value) {
@@ -17,13 +17,16 @@ Future<Element> runTests(String source, String name) async {
   final header = document.createElement('h2');
   header.textContent = 'Test WasmFfi ($name)';
   container.append(header);
-  final runner = await Example.create('assets/$source');
+  final runner = await ExampleLibraryWrapper.create('assets/$source');
   container.append(createKeyVal('Library Name', runner.getLibraryName()));
   container.append(createKeyVal('Hello String', runner.hello(name)));
   container.append(createKeyVal('Size of Int', runner.intSize().toString()));
   container.append(createKeyVal('Size of Bool', runner.boolSize().toString()));
   container.append(
     createKeyVal('Size of Pointer', runner.pointerSize().toString()),
+  );
+  container.append(
+    createKeyVal('Static Init Check', runner.staticInitCheck().toString()),
   );
   return container;
 }

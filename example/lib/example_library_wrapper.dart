@@ -1,0 +1,1 @@
+../../example_flutter/lib/example_library_wrapper.dart
