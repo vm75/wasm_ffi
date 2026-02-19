@@ -106,7 +106,9 @@ extension type WasmModule._(JSObject _) implements JSObject {
 
   // List<ByteBuffer>
   external static JSArray<JSArrayBuffer> customSections(
-      WasmModule module, JSString sectionName);
+    WasmModule module,
+    JSString sectionName,
+  );
 
   // Named constructor to create module synchronously.
   external WasmModule.fromBytesOrBuffer(JSObject bytesOrBuffer);
@@ -126,11 +128,15 @@ extension type _InstantiateResultObject._(JSObject _) implements JSObject {
 
 @JS('WebAssembly.instantiate')
 external JSPromise<_InstantiateResultObject> _instantiate(
-    JSObject bytesOrBuffer, JSObject import);
+  JSObject bytesOrBuffer,
+  JSObject import,
+);
 
 @JS('WebAssembly.instantiateStreaming')
 external JSPromise<_InstantiateResultObject> _instantiateStreaming(
-    JSAny? source, JSObject imports);
+  JSAny? source,
+  JSObject imports,
+);
 
 @JS()
 extension type MemoryDescriptor._(JSObject _) implements JSObject {
@@ -153,8 +159,10 @@ extension type WasmMemory._(JSObject _) implements JSObject {
 
 @JS()
 extension type GlobalDescriptor._(JSObject _) implements JSObject {
-  external factory GlobalDescriptor(
-      {required JSString value, JSBoolean mutable});
+  external factory GlobalDescriptor({
+    required JSString value,
+    JSBoolean mutable,
+  });
 }
 
 @JS('WebAssembly.Global')
@@ -205,6 +213,7 @@ class Instance {
         // TODO throw StateError('Could not find an export named $key');
         continue;
       }
+      // ignore: invalid_runtime_check_with_js_interop_types
       if (value is Function) {
         functions[key] = (value as JSFunction);
       } else if (WasmGlobal.isInstance(value)) {
@@ -264,8 +273,10 @@ class Instance {
   ///
   /// The returned [Instance] object is used to access the exports of the
   /// module.
-  static Future<Instance> loadFromBinary(Uint8List wasmBinary,
-      {Map<String, Map<String, JSAny?>> imports = const {}}) async {
+  static Future<Instance> loadFromBinary(
+    Uint8List wasmBinary, {
+    Map<String, Map<String, JSAny?>> imports = const {},
+  }) async {
     final importsJs = _createJsImports(imports);
 
     final native = await _instantiate(wasmBinary.toJS, importsJs).toDart;
@@ -288,8 +299,10 @@ class Instance {
   ///
   /// This function is useful if you want to load a wasm binary from a file, or
   /// from a bytes buffer.
-  static Instance loadFromBinarySync(Uint8List wasmBinary,
-      {Map<String, Map<String, JSAny?>> imports = const {}}) {
+  static Instance loadFromBinarySync(
+    Uint8List wasmBinary, {
+    Map<String, Map<String, JSAny?>> imports = const {},
+  }) {
     final importsJs = _createJsImports(imports);
     final module = WasmModule.fromBytesOrBuffer(wasmBinary.toJS);
 

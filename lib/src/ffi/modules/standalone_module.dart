@@ -53,12 +53,18 @@ class StandaloneWasmModule extends Module {
   void free(int pointer) {
     final func = _instance.functions['free'];
     if (func != null) {
-      func.callAsFunction(pointer.toJS);
+      func.callAsFunction(null, pointer.toJS);
     }
   }
 
   @override
-  ByteBuffer get heap => _instance.memories['memory']!.buffer.toDart;
+  ByteBuffer get heap {
+    final mem = _instance.memories['memory'];
+    if (mem == null) {
+      throw StateError('No memory found in WASM module');
+    }
+    return mem.buffer.toDart;
+  }
 
   @override
   WasmTable? get indirectFunctionTable =>
@@ -68,7 +74,7 @@ class StandaloneWasmModule extends Module {
   int malloc(int size) {
     final func = _instance.functions['malloc'];
     if (func != null) {
-      final resp = func.callAsFunction(size.toJS) as JSNumber?;
+      final resp = func.callAsFunction(null, size.toJS) as JSNumber?;
       return resp?.toDartInt ?? -1;
     }
     return -1;
@@ -107,6 +113,7 @@ class StandaloneWasmModule extends Module {
     String name,
     Memory memory,
   ) {
+    // ignore: invalid_runtime_check_with_js_interop_types
     return _instance.functions[name]! as F;
   }
 }

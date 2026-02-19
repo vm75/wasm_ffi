@@ -73,11 +73,8 @@ emcc -o output.js input.c \
   -s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]
 ```
 
-**Key Flags:**
-
-* `-s MODULARIZE=1`: Wraps code in a module.
-* `-s EXPORTED_RUNTIME_METHODS=HEAPU8`: **Required** for `wasm_ffi` to access memory.
-* `-s EXPORTED_FUNCTIONS`: List all C functions to export (prefix with `_`). Always include `_malloc` and `_free`.
+**Crucial:** You **MUST** include `-s EXPORTED_RUNTIME_METHODS=HEAPU8`. This exports the memory object so `universal_ffi` can access it.
+**Optimization:** Use `-Oz` for size, `-O3` for speed.
 
 #### Option B: Standalone WASM
 
@@ -89,10 +86,8 @@ emcc -o output.wasm input.c \
   -s EXPORTED_FUNCTIONS=["_myFunction", "_malloc", "_free"]
 ```
 
-#### Notes
-
-* **C++ Support**: Explicitly export `__wasm_call_ctors` to ensure static constructors run: `-Wl,--export=__wasm_call_ctors`.
-* **Optimization**: Use `-Oz` for size, `-O3` for speed.
+**Crucial:** You **MUST** include `--export=__wasm_call_ctors` if you are using C++ to ensure static constructors run.
+**Optimization:** Use `-Oz` for size, `-O3` for speed.
 
 ### 2. Generating Bindings with `ffigen`
 

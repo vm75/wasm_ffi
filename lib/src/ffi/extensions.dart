@@ -22,6 +22,7 @@ extension NativeFunctionPointer<NF extends Function>
     // ignore: prefer_final_locals
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
     if (symbol is FunctionDescription && symbol.function.isA<JSFunction>()) {
+      // ignore: invalid_runtime_check_with_js_interop_types
       return marshall<NF, DF>(symbol.function as Function, boundMemory);
     } else {
       throw ArgumentError(
