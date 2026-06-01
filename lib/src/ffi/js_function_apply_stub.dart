@@ -1,7 +1,11 @@
 import 'exceptions.dart';
 import 'memory.dart';
 
-Object? applyJsFunction(Object base, List<Object> args) {
+Object? applyJsFunction(
+  Object base,
+  List<Object> args, [
+  Set<int> jsBigIntArgumentIndexes = const {},
+]) {
   throw const MarshallingException(
     'JavaScript function invocation is only available in JavaScript runtimes!',
   );

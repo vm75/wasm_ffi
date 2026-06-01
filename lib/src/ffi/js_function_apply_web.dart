@@ -5,19 +5,28 @@ import 'exceptions.dart';
 import 'memory.dart';
 import 'types.dart';
 
-@JS('Number')
-external JSNumber _number(JSAny? obj);
+@JS('BigInt')
+external JSBigInt _bigInt(JSAny? obj);
 
-Object? applyJsFunction(Object base, List<Object> args) {
+extension type _WrappedJSAny._(JSAny _) implements JSAny {
+  @JS('toString')
+  external JSString _toString();
+}
+
+Object? applyJsFunction(
+  Object base,
+  List<Object> args, [
+  Set<int> jsBigIntArgumentIndexes = const {},
+]) {
   final jsFunction = base as JSFunction;
   final JSFunction apply = (jsFunction as JSObject).getProperty<JSFunction>(
     'apply'.toJS,
   );
-  return apply.callAsFunction(
-    jsFunction,
-    null,
-    args.map(_toJsAny).toList().toJS,
-  );
+  final jsArgs = <JSAny?>[
+    for (var i = 0; i < args.length; i++)
+      _toJsAny(args[i], asBigInt: jsBigIntArgumentIndexes.contains(i)),
+  ];
+  return apply.callAsFunction(jsFunction, null, jsArgs.toJS);
 }
 
 T jsResultToDartType<T>(
@@ -31,7 +40,7 @@ T jsResultToDartType<T>(
       return (jsResult as JSNumber).toDartInt as T;
     }
     if (jsResult.typeofEquals('bigint')) {
-      return _number(jsResult).toDartInt as T;
+      return _jsBigIntToDartInt(jsResult) as T;
     }
   } else if (T == double) {
     if (jsResult.typeofEquals('number')) {
@@ -47,7 +56,7 @@ T jsResultToDartType<T>(
   } else if (jsResult.typeofEquals('number')) {
     return toDartType<T>((jsResult as JSNumber).toDartInt, memory);
   } else if (jsResult.typeofEquals('bigint')) {
-    return toDartType<T>(_number(jsResult).toDartInt, memory);
+    return toDartType<T>(_jsBigIntToDartInt(jsResult), memory);
   }
 
   final Object? dartified = jsResult.dartify();
@@ -57,9 +66,15 @@ T jsResultToDartType<T>(
   return toDartType<T>(dartified, memory);
 }
 
-JSAny? _toJsAny(Object dartObject) {
-  if (dartObject is int || dartObject is double) {
-    return (dartObject as num).toJS;
+int _jsBigIntToDartInt(JSAny jsBigInt) {
+  return BigInt.parse((jsBigInt as _WrappedJSAny)._toString().toDart).toInt();
+}
+
+JSAny? _toJsAny(Object dartObject, {bool asBigInt = false}) {
+  if (dartObject is int) {
+    return asBigInt ? _bigInt(dartObject.toString().toJS) : dartObject.toJS;
+  } else if (dartObject is double) {
+    return dartObject.toJS;
   } else if (dartObject is bool) {
     return dartObject.toJS;
   } else if (dartObject is Pointer) {
