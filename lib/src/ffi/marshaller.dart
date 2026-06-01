@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'annotations.dart';
 import 'exceptions.dart';
 import 'invoker_generated.dart';
+import 'js_function_apply.dart';
 import 'memory.dart';
 import 'type_utils.dart';
 import 'types.dart';
@@ -78,21 +79,32 @@ void initTypes([int pointerSizeBytes = 4]) {
 }
 
 // Called from the invokers
-T execute<T>(Function base, List<Object> args, Memory memory) {
+T execute<T>(Object base, List<Object> args, Memory memory) {
   if (T == DartVoidType) {
-    Function.apply(base, args.map(_toJsType).toList());
+    if (base is Function) {
+      Function.apply(base, args.map(_toJsType).toList());
+    } else {
+      applyJsFunction(base, args);
+    }
     return null as T;
   } else {
-    final Object? result = Function.apply(base, args.map(_toJsType).toList());
+    if (base is Function) {
+      final Object? result = Function.apply(base, args.map(_toJsType).toList());
+      if (result == null) {
+        return null as T;
+      }
+      return _toDartType<T>(result, memory);
+    }
+
+    final Object? result = applyJsFunction(base, args);
     if (result == null) {
       return null as T;
     }
-    return _toDartType<T>(result, memory);
+    return jsResultToDartType<T>(result, memory, _toDartType);
   }
 }
 
-DF marshall<NF extends Function, DF extends Function>(
-    Function base, Memory memory) {
+DF marshall<NF extends Function, DF extends Function>(Object base, Memory memory) {
   return _inferFromSignature(DF.toString()).copyWith(base, memory).run as DF;
 }
 

@@ -87,6 +87,17 @@ class NativeExampleBindings {
   );
   late final _pointerSize = _pointerSizePtr.asFunction<int Function()>();
 
+  /// sum four numbers
+  int sum4(int a, int b, int c, int d) {
+    return _sum4(a, b, c, d);
+  }
+
+  late final _sum4Ptr =
+      _lookup<
+        ffi.NativeFunction<ffi.Int Function(ffi.Int, ffi.Int, ffi.Int, ffi.Int)>
+      >('sum4');
+  late final _sum4 = _sum4Ptr.asFunction<int Function(int, int, int, int)>();
+
   /// check if static initialization happened
   int static_init_check() {
     return _static_init_check();

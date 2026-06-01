@@ -32,5 +32,7 @@ class ExampleLibraryWrapper {
 
   int pointerSize() => bindings.pointerSize();
 
+  int sum4() => bindings.sum4(1, 2, 3, 4);
+
   bool staticInitCheck() => bindings.static_init_check() != 0;
 }

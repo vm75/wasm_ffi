@@ -33,6 +33,9 @@ EXPORT int boolSize(void);
 /// size of a pointer
 EXPORT int pointerSize(void);
 
+/// sum four numbers
+EXPORT int sum4(int a, int b, int c, int d);
+
 /// check if static initialization happened
 EXPORT int static_init_check(void);
 

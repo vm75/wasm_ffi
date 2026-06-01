@@ -70,6 +70,7 @@ class _AsyncRunnerWidgetState extends State<AsyncRunnerWidget> {
       'Size of Int': runner.intSize().toString(),
       'Size of Bool': runner.boolSize().toString(),
       'Size of Pointer': runner.pointerSize().toString(),
+      'Sum4': runner.sum4().toString(),
       'Static Init Check': runner.staticInitCheck().toString(),
     };
   }

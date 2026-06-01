@@ -6,6 +6,7 @@ build: assets/standalone/native_example.wasm assets/emscripten/native_example.js
 
 SRC=src/native_example.c src/native_example_cpp.cpp
 DEPS=$(SRC) $(SRC:.c=.h)
+EMCC ?= emcc
 
 # Wasm options
 ifdef  DEBUG
@@ -22,16 +23,16 @@ clean:
 	rm -rf assets/emscripten/*
 
 lib/native_example_bindings.dart: $(DEPS)
-	dart run ffigen --config ffigen.yaml && sed -i "s#'dart:ffi'#'package:wasm_ffi/ffi.dart'#g" $@
+	dart run ffigen --config ffigen.yaml && perl -pi -e "s#(['\"])dart:ffi\\1#'package:wasm_ffi/ffi.dart'#g" $@
 
 assets/standalone/native_example.wasm: $(DEPS) lib/native_example_bindings.dart
-	emcc -o assets/standalone/native_example.wasm $(COMPILER_OPTIONS) $(LINKER_OPTIONS) \
+	$(EMCC) -o assets/standalone/native_example.wasm $(COMPILER_OPTIONS) $(LINKER_OPTIONS) \
 		$(SRC) \
 		-s STANDALONE_WASM=1 \
 		-s $(COMPILED_EXPORTS)
 
 assets/emscripten/native_example.js: $(DEPS) lib/native_example_bindings.dart
-	emcc -o assets/emscripten/native_example.js $(COMPILER_OPTIONS) $(LINKER_OPTIONS) \
+	$(EMCC) -o assets/emscripten/native_example.js $(COMPILER_OPTIONS) $(LINKER_OPTIONS) \
 		$(SRC) \
 		-s MODULARIZE=1 -s 'EXPORT_NAME="native_example"' -s ALLOW_MEMORY_GROWTH=1 \
 		-s EXPORTED_RUNTIME_METHODS=HEAPU8 \

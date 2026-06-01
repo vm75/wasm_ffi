@@ -1,4 +1,3 @@
-import 'dart:js_interop';
 import 'dart:typed_data';
 import 'annotations.dart';
 import 'exceptions.dart';
@@ -21,9 +20,8 @@ extension NativeFunctionPointer<NF extends Function>
   DF asFunction<DF extends Function>() {
     // ignore: prefer_final_locals
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
-    if (symbol is FunctionDescription && symbol.function.isA<JSFunction>()) {
-      // ignore: invalid_runtime_check_with_js_interop_types
-      return marshall<NF, DF>(symbol.function as Function, boundMemory);
+    if (symbol is FunctionDescription) {
+      return marshall<NF, DF>(symbol.function, boundMemory);
     } else {
       throw ArgumentError(
         'No function at address $address was found (but a global symbol)!',

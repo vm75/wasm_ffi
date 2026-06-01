@@ -12,7 +12,7 @@ class OpaqueInvokeHelper<T extends Opaque> extends InvokeHelper<Pointer<T>> {
   OpaqueInvokeHelper(super.base, super.memory);
 
   @override
-  InvokeHelper<Pointer<T>> copyWith(Function base, Memory memory) {
+  InvokeHelper<Pointer<T>> copyWith(Object base, Memory memory) {
     return OpaqueInvokeHelper<T>(base, memory);
   }
 
@@ -282,7 +282,7 @@ class OpaqueInvokeHelperSquare<T extends Opaque>
   OpaqueInvokeHelperSquare(super.base, super.memory);
 
   @override
-  InvokeHelper<Pointer<Pointer<T>>> copyWith(Function base, Memory memory) {
+  InvokeHelper<Pointer<Pointer<T>>> copyWith(Object base, Memory memory) {
     return OpaqueInvokeHelperSquare<T>(base, memory);
   }
 
@@ -549,11 +549,11 @@ class OpaqueInvokeHelperSquare<T extends Opaque>
 
 class InvokeHelper<T> {
   final Memory? _memory;
-  final Function? _base;
+  final Object? _base;
 
   const InvokeHelper(this._base, this._memory);
 
-  InvokeHelper<T> copyWith(Function base, Memory memory) {
+  InvokeHelper<T> copyWith(Object base, Memory memory) {
     return InvokeHelper(base, memory);
   }
 
@@ -688,7 +688,7 @@ class InvokeHelper<T> {
     if (_base == null || _memory == null) {
       throw StateError('Call copyWith first!');
     }
-    final Function base = _base;
+    final Object base = _base;
     final Memory memory = _memory;
     final List<Object> args = [
       arg0,

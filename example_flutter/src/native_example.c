@@ -42,3 +42,9 @@ EXPORT int pointerSize(void)
 {
   return (int)sizeof(void*);
 }
+
+/// sum four numbers
+EXPORT int sum4(int a, int b, int c, int d)
+{
+  return a + b + c + d;
+}
