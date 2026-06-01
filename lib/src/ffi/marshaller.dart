@@ -129,8 +129,14 @@ DF marshall<NF extends Function, DF extends Function>(
 }
 
 @visibleForTesting
-List<int> jsBigIntArgumentIndexesForTesting<NF extends Function>() =>
-    List.unmodifiable(_jsBigIntArgumentIndexes(typeString<NF>()));
+List<int> jsBigIntArgumentIndexesForTesting<NF extends Function>({
+  int? pointerSizeBytes,
+}) => List.unmodifiable(
+  _jsBigIntArgumentIndexes(
+    typeString<NF>(),
+    pointerSizeBytes: pointerSizeBytes,
+  ),
+);
 
 final class _NativeFunctionInvocation {
   const _NativeFunctionInvocation(this.base, this.jsBigIntArgumentIndexes);
@@ -139,11 +145,14 @@ final class _NativeFunctionInvocation {
   final Set<int> jsBigIntArgumentIndexes;
 }
 
-Set<int> _jsBigIntArgumentIndexes(String nativeSignature) {
+Set<int> _jsBigIntArgumentIndexes(
+  String nativeSignature, {
+  int? pointerSizeBytes,
+}) {
   final indexes = <int>{};
   final argTypes = _argumentTypesFromSignature(nativeSignature);
   for (var i = 0; i < argTypes.length; i++) {
-    if (_usesJsBigInt(argTypes[i])) {
+    if (_usesJsBigInt(argTypes[i], pointerSizeBytes)) {
       indexes.add(i);
     }
   }
@@ -179,13 +188,23 @@ List<String> _argumentTypesFromSignature(String signature) {
   return result;
 }
 
-bool _usesJsBigInt(String nativeType) {
-  return nativeType == typeString<Int64>() ||
-      nativeType == typeString<Uint64>() ||
-      registeredPointerSizeBytes == 8 &&
-          (nativeType == typeString<IntPtr>() ||
-              nativeType == typeString<UintPtr>() ||
-              nativeType == typeString<Size>());
+final String _pointerTypePrefix = typeString<Pointer<dynamic>>()
+    .split(typeString<dynamic>())
+    .first;
+
+bool _usesJsBigInt(String nativeType, int? pointerSizeBytes) {
+  if (nativeType == typeString<Int64>() || nativeType == typeString<Uint64>()) {
+    return true;
+  }
+
+  if ((pointerSizeBytes ?? registeredPointerSizeBytes) != 8) {
+    return false;
+  }
+
+  return nativeType == typeString<IntPtr>() ||
+      nativeType == typeString<UintPtr>() ||
+      nativeType == typeString<Size>() ||
+      nativeType.startsWith(_pointerTypePrefix);
 }
 
 Object _toJsType(Object dartObject) {

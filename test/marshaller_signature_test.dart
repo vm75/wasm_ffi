@@ -19,4 +19,22 @@ void main() {
       isEmpty,
     );
   });
+
+  test(
+    'identifies pointer-sized arguments that require JS BigInt on wasm64',
+    () {
+      expect(
+        marshaller.jsBigIntArgumentIndexesForTesting<
+          Void Function(Pointer<Int8>, IntPtr, UintPtr, Size, Int)
+        >(pointerSizeBytes: 8),
+        [0, 1, 2, 3],
+      );
+      expect(
+        marshaller.jsBigIntArgumentIndexesForTesting<
+          Void Function(Pointer<Int8>, IntPtr, UintPtr, Size, Int)
+        >(pointerSizeBytes: 4),
+        isEmpty,
+      );
+    },
+  );
 }

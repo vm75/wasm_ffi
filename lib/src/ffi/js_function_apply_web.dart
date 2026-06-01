@@ -78,7 +78,9 @@ JSAny? _toJsAny(Object dartObject, {bool asBigInt = false}) {
   } else if (dartObject is bool) {
     return dartObject.toJS;
   } else if (dartObject is Pointer) {
-    return dartObject.address.toJS;
+    return asBigInt
+        ? _bigInt(dartObject.address.toString().toJS)
+        : dartObject.address.toJS;
   } else {
     throw MarshallingException(
       'Could not convert dart type ${dartObject.runtimeType} to a JavaScript type!',
