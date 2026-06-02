@@ -29,6 +29,10 @@ Object? applyJsFunction(
   return apply.callAsFunction(jsFunction, null, jsArgs.toJS);
 }
 
+Object? toJsFunctionArgument(Object dartObject, {bool asBigInt = false}) {
+  return _toJsAny(dartObject, asBigInt: asBigInt);
+}
+
 T jsResultToDartType<T>(
   Object result,
   Memory memory,

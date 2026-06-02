@@ -37,4 +37,18 @@ void main() {
       );
     },
   );
+
+  test('handles nested function type arguments when parsing signatures', () {
+    expect(
+      marshaller
+          .jsBigIntArgumentIndexesForTesting<
+            Void Function(
+              Int64,
+              Pointer<NativeFunction<Int64 Function(Int64)>>,
+              Uint64,
+            )
+          >(),
+      [0, 2],
+    );
+  });
 }

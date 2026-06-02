@@ -88,7 +88,10 @@ T execute<T>(Object base, List<Object> args, Memory memory) {
 
   if (T == DartVoidType) {
     if (target is Function) {
-      Function.apply(target, args.map(_toJsType).toList());
+      Function.apply(
+        target,
+        _toJsFunctionArguments(args, jsBigIntArgumentIndexes),
+      );
     } else {
       applyJsFunction(target, args, jsBigIntArgumentIndexes);
     }
@@ -97,7 +100,7 @@ T execute<T>(Object base, List<Object> args, Memory memory) {
     if (target is Function) {
       final Object? result = Function.apply(
         target,
-        args.map(_toJsType).toList(),
+        _toJsFunctionArguments(args, jsBigIntArgumentIndexes),
       );
       if (result == null) {
         return null as T;
@@ -160,7 +163,9 @@ Set<int> _jsBigIntArgumentIndexes(
 }
 
 List<String> _argumentTypesFromSignature(String signature) {
-  final argList = signature.split('=>').first.trim();
+  final separator = _topLevelReturnSeparator(signature);
+  final argList =
+      (separator == -1 ? signature : signature.substring(0, separator)).trim();
   if (!argList.startsWith('(') || !argList.endsWith(')')) {
     return const [];
   }
@@ -171,21 +176,53 @@ List<String> _argumentTypesFromSignature(String signature) {
   }
 
   final result = <String>[];
-  var depth = 0;
+  var angleDepth = 0;
+  var parenDepth = 0;
   var start = 0;
   for (var i = 0; i < body.length; i++) {
     final codeUnit = body.codeUnitAt(i);
-    if (codeUnit == 0x3c) {
-      depth++;
+    if (codeUnit == 0x3d &&
+        i + 1 < body.length &&
+        body.codeUnitAt(i + 1) == 0x3e) {
+      i++;
+    } else if (codeUnit == 0x3c) {
+      angleDepth++;
     } else if (codeUnit == 0x3e) {
-      depth--;
-    } else if (codeUnit == 0x2c && depth == 0) {
+      angleDepth--;
+    } else if (codeUnit == 0x28) {
+      parenDepth++;
+    } else if (codeUnit == 0x29) {
+      parenDepth--;
+    } else if (codeUnit == 0x2c && angleDepth == 0 && parenDepth == 0) {
       result.add(body.substring(start, i).trim());
       start = i + 1;
     }
   }
   result.add(body.substring(start).trim());
   return result;
+}
+
+int _topLevelReturnSeparator(String signature) {
+  var angleDepth = 0;
+  var parenDepth = 0;
+  for (var i = 0; i < signature.length - 1; i++) {
+    final codeUnit = signature.codeUnitAt(i);
+    if (codeUnit == 0x3d && signature.codeUnitAt(i + 1) == 0x3e) {
+      if (angleDepth == 0 && parenDepth == 0) {
+        return i;
+      }
+      i++;
+    } else if (codeUnit == 0x3c) {
+      angleDepth++;
+    } else if (codeUnit == 0x3e) {
+      angleDepth--;
+    } else if (codeUnit == 0x28) {
+      parenDepth++;
+    } else if (codeUnit == 0x29) {
+      parenDepth--;
+    }
+  }
+  return -1;
 }
 
 final String _pointerTypePrefix = typeString<Pointer<dynamic>>()
@@ -207,16 +244,17 @@ bool _usesJsBigInt(String nativeType, int? pointerSizeBytes) {
       nativeType.startsWith(_pointerTypePrefix);
 }
 
-Object _toJsType(Object dartObject) {
-  if (dartObject is int || dartObject is double || dartObject is bool) {
-    return dartObject;
-  } else if (dartObject is Pointer) {
-    return dartObject.address;
-  } else {
-    throw MarshallingException(
-      'Could not convert dart type ${dartObject.runtimeType} to a JavaScript type!',
-    );
-  }
+List<Object?> _toJsFunctionArguments(
+  List<Object> args,
+  Set<int> jsBigIntArgumentIndexes,
+) {
+  return [
+    for (var i = 0; i < args.length; i++)
+      toJsFunctionArgument(
+        args[i],
+        asBigInt: jsBigIntArgumentIndexes.contains(i),
+      ),
+  ];
 }
 
 InvokeHelper _inferFromSignature(String signature) {
