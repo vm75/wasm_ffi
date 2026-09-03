@@ -1,6 +1,3 @@
-@TestOn('browser')
-library standalone_wasm_test;
-
 import 'package:test/test.dart';
 import 'package:wasm_ffi/ffi.dart';
 import 'package:wasm_ffi/ffi_utils.dart'; // Maybe not needed, but good
