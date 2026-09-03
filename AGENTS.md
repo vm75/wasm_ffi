@@ -17,7 +17,7 @@ through JavaScript/WebAssembly interop.
 - `test/` — Chrome tests, signature tests, and the standalone Wasm fixture.
 - `example/` — vanilla Dart web example.
 - `example_flutter/` — Flutter web example using standalone and Emscripten assets.
-- `.github/workflows/` — pull-request CI and the changelog-triggered publish validation workflow.
+- `.github/workflows/` — pull-request CI and the version-triggered publish workflow.
 
 ## Working commands
 
