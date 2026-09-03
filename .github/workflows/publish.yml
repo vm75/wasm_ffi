@@ -1,70 +1,12 @@
-name: Publish Dart Packages
+name: Publish to pub.dev
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'pubspec.yaml'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  analyze-and-publish:
-    name: Analyze and Publish Dart Packages
-    runs-on: ubuntu-latest
+  publish:
     permissions:
       id-token: write
-      contents: read
-
-    strategy:
-      matrix:
-        package:
-          - wasm_ffi
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Check if version is updated
-        id: check_version
-        run: |
-          CURRENT_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
-          PREV_VERSION=$(git show HEAD~1:pubspec.yaml 2>/dev/null | grep '^version:' | awk '{print $2}' || true)
-          echo "Current version: $CURRENT_VERSION"
-          echo "Previous version: $PREV_VERSION"
-
-          if [ -z "$CURRENT_VERSION" ]; then
-            echo "Could not parse current version from pubspec.yaml"
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          elif [ "$CURRENT_VERSION" = "$PREV_VERSION" ]; then
-            echo "Version unchanged ($CURRENT_VERSION). Skipping publish."
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Version updated from '$PREV_VERSION' to '$CURRENT_VERSION'."
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Analyze ${{ matrix.package }}
-        if: steps.check_version.outputs.publish == 'true'
-        run: |
-          dart pub get
-          dart analyze
-          dart test
-
-      - name: Publish ${{ matrix.package }}
-        if: steps.check_version.outputs.publish == 'true'
-        env:
-          PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
-        run: |
-          # Validate the package
-          dart pub publish --dry-run
-
-          # Publish the package
-          echo "Publishing ${{ matrix.package }} to pub.dev..."
-          dart pub publish --force
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
