@@ -57,36 +57,38 @@ void main() {
       expect(add64(a, b), equals(a + b));
     });
 
-    test('pointer read/write (32-bit pointers but we handle them transparently)', () {
-      final derefU8 = dylib.lookupFunction<DerefU8Native, DerefU8Dart>(
-        'deref_u8',
-      );
-      final writeU8 = dylib.lookupFunction<WriteU8Native, WriteU8Dart>(
-        'write_u8',
-      );
+    test(
+      'pointer read/write (32-bit pointers but we handle them transparently)',
+      () {
+        final derefU8 = dylib.lookupFunction<DerefU8Native, DerefU8Dart>(
+          'deref_u8',
+        );
+        final writeU8 = dylib.lookupFunction<WriteU8Native, WriteU8Dart>(
+          'write_u8',
+        );
 
-      final ptr = malloc.allocate<Uint8>(1);
+        final ptr = malloc.allocate<Uint8>(1);
 
-      writeU8(ptr, 42);
-      final val = derefU8(ptr);
+        writeU8(ptr, 42);
+        final val = derefU8(ptr);
 
-      expect(val, equals(42));
+        expect(val, equals(42));
 
-      // Also verify via the dart pointer abstraction
-      expect(ptr.value, equals(42));
+        // Also verify via the dart pointer abstraction
+        expect(ptr.value, equals(42));
 
-      ptr.value = 99;
-      expect(derefU8(ptr), equals(99));
+        ptr.value = 99;
+        expect(derefU8(ptr), equals(99));
 
-      malloc.free(ptr);
-    });
+        malloc.free(ptr);
+      },
+    );
 
     test('lookup asFunction equivalent to lookupFunction', () {
       final add64_1 = dylib.lookupFunction<Add64Native, Add64Dart>('add64');
-      final add64_2 =
-          dylib.lookup<NativeFunction<Add64Native>>('add64').asFunction<
-            Add64Dart
-          >();
+      final add64_2 = dylib
+          .lookup<NativeFunction<Add64Native>>('add64')
+          .asFunction<Add64Dart>();
 
       expect(add64_1(5, 5), equals(10));
       expect(add64_2(5, 5), equals(10));
