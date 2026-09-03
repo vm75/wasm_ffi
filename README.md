@@ -8,9 +8,9 @@
 [![wasm_ffi_pub_likes]][wasm_ffi_pub_score_url]
 [![license_badge]][license_url]
 
-`wasm_ffi` intends to be a drop-in replacement for `dart:ffi` on the web platform using wasm. wasm_ffi is built on top of [web_ffi](https://pub.dev/packages/web_ffi).
-The general idea is to expose an API that is compatible with `dart:ffi` but translates all calls through `dart:js` to a browser running `WebAssembly`.
-Wasm with js helper as well as standalone wasm is supported. For testing emcc is used.
+`wasm_ffi` intends to be a drop-in replacement for `dart:ffi` on the web platform using WebAssembly.
+It supports both legacy `dart2js` and the modern `dart2wasm` compiler, handling 64-bit BigInt conversion automatically.
+Wasm modules with JS helper glue (Emscripten) as well as standalone Wasm are supported.
 
 To simplify the usage, [universal_ffi](https://pub.dev/packages/universal_ffi) is provided, which uses `wasm_ffi` on web and `dart:ffi` on other platforms.
 

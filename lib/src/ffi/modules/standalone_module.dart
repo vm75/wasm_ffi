@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../../js_utils/wasm_interop.dart';
 import '../annotations.dart';
+import '../extensions.dart';
 import '../memory.dart';
 import '../type_utils.dart';
 import '../types.dart';
@@ -113,7 +114,6 @@ class StandaloneWasmModule extends Module {
     String name,
     Memory memory,
   ) {
-    // ignore: invalid_runtime_check_with_js_interop_types
-    return _instance.functions[name]! as F;
+    return lookup<NativeFunction<T>>(name, memory).asFunction<F>();
   }
 }

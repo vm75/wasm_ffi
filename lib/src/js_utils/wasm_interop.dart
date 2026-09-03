@@ -213,9 +213,8 @@ class Instance {
         // TODO throw StateError('Could not find an export named $key');
         continue;
       }
-      // ignore: invalid_runtime_check_with_js_interop_types
-      if (value is Function) {
-        functions[key] = (value as JSFunction);
+      if (value.typeofEquals('function')) {
+        functions[key] = value as JSFunction;
       } else if (WasmGlobal.isInstance(value)) {
         globals[key] = (value as WasmGlobal);
       } else if (WasmMemory.isInstance(value)) {

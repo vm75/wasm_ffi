@@ -8,10 +8,10 @@ class MarshallingException implements Exception {
   const MarshallingException([this.message]);
 
   MarshallingException.noAddress(Object o)
-      : this('Expected a address (int) but found ${o.runtimeType}');
+    : this('Expected a address (int) but found ${o.runtimeType}');
 
   MarshallingException.typeMissmatch(Type t, Object o)
-      : this('Expected a type of $t but object has type ${o.runtimeType}');
+    : this('Expected a type of $t but object has type ${o.runtimeType}');
 
   @override
   String toString() => Exception(message).toString();
