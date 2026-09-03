@@ -1,11 +1,12 @@
-// ignore_for_file: avoid_relative_lib_imports, avoid_print
-
+import 'package:test/test.dart';
 import 'package:wasm_ffi/ffi.dart';
 import 'package:wasm_ffi/src/ffi/type_utils.dart';
 
 void main() {
-  print(pointerPointerPointerPrefix);
-  print(pointerNativeFunctionPrefix);
-  print(isVoidType<Void>());
-  print(isVoidType<NativeType>());
+  test('type utils prefixes and void checks', () {
+    expect(pointerPointerPointerPrefix, isNotEmpty);
+    expect(pointerNativeFunctionPrefix, isNotEmpty);
+    expect(isVoidType<Void>(), isTrue);
+    expect(isVoidType<NativeType>(), isFalse);
+  });
 }

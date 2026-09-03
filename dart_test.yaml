@@ -1,0 +1,4 @@
+# wasm_ffi targets the web platform and uses dart:js_interop,
+# which requires a browser environment.
+platforms:
+  - chrome
