@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 import 'package:wasm_ffi/ffi.dart';
-import 'package:wasm_ffi/ffi_utils.dart'; // Maybe not needed, but good
+import 'package:wasm_ffi/src/ffi/memory.dart';
 
 // Declare types
 typedef Add32Native = Uint32 Function(Uint32 a, Uint32 b);
@@ -67,7 +67,7 @@ void main() {
           'write_u8',
         );
 
-        final ptr = malloc.allocate<Uint8>(1);
+        final ptr = Memory.global!.allocate<Uint8>(1);
 
         writeU8(ptr, 42);
         final val = derefU8(ptr);
@@ -80,7 +80,7 @@ void main() {
         ptr.value = 99;
         expect(derefU8(ptr), equals(99));
 
-        malloc.free(ptr);
+        Memory.global!.free(ptr);
       },
     );
 
