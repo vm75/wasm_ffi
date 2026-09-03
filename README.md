@@ -8,31 +8,33 @@
 [![wasm_ffi_pub_likes]][wasm_ffi_pub_score_url]
 [![license_badge]][license_url]
 
-`wasm_ffi` intends to be a drop-in replacement for `dart:ffi` on the web platform using wasm. wasm_ffi is built on top of [web_ffi](https://pub.dev/packages/web_ffi).
-The general idea is to expose an API that is compatible with `dart:ffi` but translates all calls through `dart:js` to a browser running `WebAssembly`.
-Wasm with js helper as well as standalone wasm is supported. For testing emcc is used.
+`wasm_ffi` provides a `dart:ffi`-like API for WebAssembly modules on the web.
+It supports Dart web applications compiled with `dart2js` or `dart2wasm`,
+including standalone Wasm and Emscripten JavaScript glue. JavaScript `BigInt`
+conversion is used for 64-bit values crossing the JS boundary.
 
 To simplify the usage, [universal_ffi](https://pub.dev/packages/universal_ffi) is provided, which uses `wasm_ffi` on web and `dart:ffi` on other platforms.
 
 ## Differences to dart:ffi
 
-While `wasm_ffi` tries to mimic the `dart:ffi` API as close as possible, there are some differences. The list below documents the most importent ones, make sure to read it. For more insight, take a look at the API documentation.
+While `wasm_ffi` tries to mimic the `dart:ffi` API closely, there are some
+important differences:
 
 * The [`DynamicLibrary`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary-class.html) `open` method is asynchronous. It also accepts some additional optional parameters.
 * If more than one library is loaded, the memory will continue to refer to the first library. **This breaks calls to later loaded libraries!** One workaround is to specify the correct library.allocator for each usage of `using`.
 * Each library has its own memory, so objects cannot be shared between libraries.
 * Some advanced types are still unsupported.
 * There are some classes and functions that are present in `wasm_ffi` but not in `dart:ffi`; such things are annotated with [`@extra`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_meta/extra-constant.html).
-* There is a new class [`Memory`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Memory-class.html) which is **IMPORTANT** and explained in deepth below.
-* If you extend the [`Opaque`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Opaque-class.html) class, you must register the extended class using [`@extra registerOpaqueType<T>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/registerOpaqueType.html) before using it! Also, your class MUST NOT have type arguments (what should not be a problem).
+* Each loaded library has a module-specific `Memory` and `allocator`.
+* If you extend the [`Opaque`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Opaque-class.html) class, you must register it with [`registerOpaqueType<T>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/registerOpaqueType.html) before use. The class must not have type arguments.
 * There are some rules concerning interacting with native functions, as listed below.
 
 ### Rules for functions
 
 There are some rules and things to notice when working with functions:
 
-* When looking up a function using [`DynamicLibrary.lookup<NativeFunction<NF>>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/lookup.html) (or [`DynamicLibraryExtension.lookupFunction<T extends Function, F extends Function>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibraryExtension/lookupFunction.html)) the actuall type argument `NF` (or `T` respectively) of is not used: There is no type checking, if the function exported from `WebAssembly` has the same signature or amount of parameters, only the name is looked up.
-* There are special constraints on the return type (not on parameter types) of functions `DF` (or `F` ) if you call [`NativeFunctionPointer.asFunction<DF>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/NativeFunctionPointer/asFunction.html) (or [`DynamicLibraryExtension.lookupFunction<T extends Function, F extends Function>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibraryExtension/lookupFunction.html) what uses the former internally):
+* When looking up a function using [`DynamicLibrary.lookup<NativeFunction<NF>>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/lookup.html) or [`DynamicLibrary.lookupFunction<T extends Function, F extends Function>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/lookupFunction.html), the native type argument is not used to validate the exported signature. The caller must provide the correct name, signature, and arity.
+* There are special constraints on the return type (not on parameter types) of functions `DF` (or `F`) if you call [`NativeFunctionPointer.asFunction<DF>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/NativeFunctionPointer/asFunction.html) or `DynamicLibrary.lookupFunction` (which uses the former internally):
   * You may nest the pointer type up to two times but not more:
     * e.g. `Pointer<Int32>` and `Pointer<Pointer<Int32>>` are allowed but `Pointer<Pointer<Pointer<Int32>>>` is not.
   * If the return type is `Pointer<NativeFunction>` you MUST use `Pointer<NativeFunction<dynamic>>`, everything else will fail. You can restore the type arguments afterwards yourself using casting. On the other hand, as stated above, type arguments for `NativeFunction`s are just ignored anyway.
@@ -41,15 +43,37 @@ There are some rules and things to notice when working with functions:
 
 ### Memory
 
-NOTE: While most of this section is still correct, some of it is now automated.
-The first call you sould do when you want to use `wasm_ffi` is [`Memory.init()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Memory/init.html). It has an optional parameter where you can adjust your pointer size. The argument defaults to 4 to represent 32bit pointers, if you use wasm64, call `Memory.init(8)`.
-Contraty to `dart:ffi` where the dart process shares all the memory, on `WebAssembly`, each instance is bound to a `WebAssembly.Memory` object. For now, we assume that every `WebAssembly` module you use has it's own memory. If you think we should change that, open a issue on [GitHub](https://github.com/vm75/wasm_ffi/) and report your usecase.
-Every pointer you use is bound to a memory object. This memory object is accessible using the [`@extra Pointer.boundMemory`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/boundMemory.html) field. If you want to create a Pointer using the [`Pointer.fromAddress()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/Pointer.fromAddress.html) constructor, you may notice the optional `bindTo` parameter. Since each pointer must be bound to a memory object, you can explicitly speficy a memory object here. To match the `dart:ffi` API, the `bindTo` parameter is optional. Because it is optional, there has to be a fallback mechanism if no `bindTo` is specified: The static [`Memory.global`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi_modules/Memory/global.html) field. If that field is also not set, an exception is thrown when invoking the `Pointer.fromAddress()` constructor.
-Also, each [`DynamicLibrary`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary-class.html) is bound to a memory object, which is again accessible with [`@extra DynamicLibrary.boundMemory`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/boundMemory.html). This might come in handy, since `Memory` implements the [`Allocator`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Allocator-class.html) class.
+Each `DynamicLibrary.open` call creates or binds a module-specific memory
+object. Contrary to `dart:ffi`, separately loaded WebAssembly modules do not
+share memory, so their pointers cannot be mixed.
+Every pointer is bound to a memory object. Use [`Pointer.fromAddress()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/Pointer/Pointer.fromAddress.html) with its optional `bindTo` argument when an address must be bound explicitly.
+Use the [`DynamicLibrary.allocator`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/allocator.html)
+property for allocations passed to that library.
 
 ## Usage Guide
 
 This guide covers how to build your WASM modules, generate bindings, and use them in both vanilla Dart and Flutter applications.
+
+### Quick start
+
+Load a standalone module by URL and invoke an exported function:
+
+```dart
+import 'package:wasm_ffi/ffi.dart';
+
+typedef AddNative = Int32 Function(Int32, Int32);
+typedef AddDart = int Function(int, int);
+
+Future<void> main() async {
+  final library = await DynamicLibrary.open('assets/example.wasm');
+  final add = library.lookupFunction<AddNative, AddDart>('add');
+  print(add(2, 3));
+  await library.close();
+}
+```
+
+Use a generated Emscripten `.js` glue file in the same way. `open` infers the
+module kind from the extension and fetches the asset asynchronously.
 
 ### 1. Building WASM with Emscripten
 
@@ -93,10 +117,10 @@ emcc -o output.wasm input.c \
 
 You can use `ffigen` to generate bindings, but you need a proxy to handle the difference between `dart:ffi` and `wasm_ffi`.
 
-1. **Create a Proxy File** (`lib/src/proxy_ffi.dart`):
+1. **Create a proxy file** in the consuming package:
 
     ```dart
-    export 'package:wasm_ffi/wasm_ffi.dart' if (dart.library.ffi) 'dart:ffi';
+    export 'package:wasm_ffi/ffi.dart' if (dart.library.ffi) 'dart:ffi';
     ```
 
 2. **Generate Bindings**: Configure `ffigen` to generate bindings as usual.
@@ -129,16 +153,10 @@ For a pure Dart web application:
 3. **Dart Code**:
 
     ```dart
-    import 'package:wasm_ffi/wasm_ffi.dart';
-    import 'package:wasm_ffi/wasm_ffi_modules.dart';
+    import 'package:wasm_ffi/ffi.dart';
 
     void main() async {
-      // Initialize Memory
-      Memory.init();
-
-      // Load Module (processes the script tag)
-      var module = await EmscriptenModule.process('MyModule');
-      var dylib = DynamicLibrary.fromModule(module);
+      final dylib = await DynamicLibrary.open('assets/example.js');
 
       // Use dylib to look up functions or use generated bindings
       // ...
@@ -149,29 +167,14 @@ For a pure Dart web application:
 
 For Flutter Web applications:
 
-1. **Assets**: Place `libexample.js` and `libexample.wasm` in your `assets/` folder and add them to `pubspec.yaml`.
-2. **Dependency**: Add `inject_js` to your `pubspec.yaml` to help load the JS.
-3. **Initialization**:
+1. **Assets**: Place the generated `.js` and `.wasm` files in the Flutter asset directory and add them to `pubspec.yaml`.
+2. **Initialization**:
 
     ```dart
-    import 'package:flutter/services.dart';
-    import 'package:inject_js/inject_js.dart' as Js;
-    import 'package:wasm_ffi/wasm_ffi.dart';
-    import 'package:wasm_ffi/wasm_ffi_modules.dart';
+    import 'package:wasm_ffi/ffi.dart';
 
     Future<void> init() async {
-      Memory.init();
-
-      // 1. Inject JS Glue
-      await Js.importLibrary('assets/libexample.js');
-
-      // 2. Load WASM Binary
-      var wasmFile = await rootBundle.load('assets/libexample.wasm');
-      var wasmMap = {'wasmBinary': wasmFile.buffer.asUint8List()};
-
-      // 3. Compile & Instantiate
-      var module = await EmscriptenModule.compile(wasmMap, 'MyModule');
-      var dylib = DynamicLibrary.fromModule(module);
+      final dylib = await DynamicLibrary.open('assets/libexample.js');
     }
     ```
 
@@ -182,7 +185,7 @@ To support both Web (via `wasm_ffi`) and Native (via `dart:ffi`) in the same cod
 1. **Proxy File**: Enhance your `proxy_ffi.dart` to conditionally export initialization logic.
 
     ```dart
-    export 'package:wasm_ffi/wasm_ffi.dart' if (dart.library.ffi) 'dart:ffi';
+    export 'package:wasm_ffi/ffi.dart' if (dart.library.ffi) 'dart:ffi';
     export 'init_web.dart' if (dart.library.ffi) 'init_native.dart';
     ```
 
@@ -201,9 +204,33 @@ To support both Web (via `wasm_ffi`) and Native (via `dart:ffi`) in the same cod
     }
     ```
 
+## Development and verification
+
+Run these commands from the repository root:
+
+```shell
+dart pub get
+dart format --output=none --set-exit-if-changed .
+dart analyze lib test
+dart test
+dart test --compiler=dart2wasm test/marshaller_signature_test.dart
+dart compile wasm test/standalone_wasm_test.dart -o /tmp/standalone_wasm_test.wasm
+dart pub publish --dry-run
+```
+
+The default test suite runs on Chrome because the implementation uses
+web-only JavaScript interop. CI also runs `flutter analyze`, `flutter build
+web`, and `flutter build web --wasm` in `example_flutter`. The complete test
+suite compiled as dart2wasm may exceed Chromium's WasmGC subtype-depth limit;
+the repository therefore tests dart2wasm signature logic separately and does
+not claim wasm64 runtime support.
+
+See [`AGENTS.md`](AGENTS.md) for contributor workflow and
+[`ARCHITECTURE.md`](ARCHITECTURE.md) for component boundaries.
+
 ## Appendix: Return Types
 
-Allowed return types for functions used as type parameter in [`NativeFunctionPointer.asFunction<DF>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/NativeFunctionPointer/asFunction.html) and [`DynamicLibraryExtension.lookupFunction<T extends Function, F extends Function>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/lookupFunction.html):
+Allowed return types for functions used as type parameter in [`NativeFunctionPointer.asFunction<DF>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/NativeFunctionPointer/asFunction.html) and [`DynamicLibrary.lookupFunction<T extends Function, F extends Function>()`](https://pub.dev/documentation/wasm_ffi/latest/wasm_ffi/DynamicLibrary/lookupFunction.html):
 
 * `int`
 * `double`
@@ -232,7 +259,7 @@ Contributions are welcome! 🚀
 [license_badge]: https://img.shields.io/badge/license-BSD-blue.svg
 [license_url]: https://github.com/vm75/wasm_ffi/blob/main/LICENSE
 
-[build_badge]: https://img.shields.io/github/actions/workflow/status/vm75/wasm_ffi/.github/workflows/publish.yml?branch=main
+[build_badge]: https://img.shields.io/github/actions/workflow/status/vm75/wasm_ffi/.github/workflows/ci.yml?branch=main
 [build_url]: https://github.com/vm75/wasm_ffi/actions
 
 [github_badge]: https://img.shields.io/badge/github-gray?style=flat&logo=Github

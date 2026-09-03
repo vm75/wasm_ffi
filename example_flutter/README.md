@@ -1,39 +1,41 @@
-# wasm_ffi Flutter Example
+# Flutter web example
 
-This project demonstrates how to use `wasm_ffi` in a Flutter web application.
+This example loads the same native API in two forms: a standalone Wasm module
+and an Emscripten module with JavaScript glue. It uses `wasm_ffi` bindings to
+display library metadata, string results, native sizes, and the C++ static
+initialization check.
 
-It shows:
+## Files
 
-1. **Asset Management**: How to include `.wasm` and `.js` files as Flutter assets.
-2. **Initialization**: How to load these assets and initialize the `wasm_ffi` runtime using `inject_js` and `EmscriptenModule.compile()`.
-3. **UI Integration**: Calling C functions (via WASM) and displaying the result in a Flutter widget.
+- `lib/main.dart` — Flutter UI showing both module variants.
+- `lib/example_library_wrapper.dart` — module loading and typed calls.
+- `lib/native_example_bindings.dart` — `ffigen` output adapted to
+  `package:wasm_ffi/ffi.dart`.
+- `assets/standalone/` — raw standalone Wasm module.
+- `assets/emscripten/` — Emscripten JavaScript glue and Wasm module.
+- `src/` — C/C++ sources for rebuilding the assets.
+- `Makefile` — asset generation commands.
 
-## Getting Started
+## Build and run
 
-1. **Prerequisites**:
-    * Flutter SDK installed.
-    * `wasm_ffi` and `inject_js` dependencies (see `pubspec.yaml`).
-    * Compiled `libopus.js` and `libopus.wasm` in `assets/`.
+From this directory:
 
-2. **Run the App**:
-    * Chrome is the recommended target for testing WASM.
-    * Run:
+```shell
+flutter pub get
+make build
+flutter run -d chrome
+```
 
-        ```bash
-        flutter run -d chrome
-        ```
+To validate the two Flutter web compilers:
 
-3. **What to Expect**:
-    * The app should launch in Chrome.
-    * It will load the WASM module.
-    * It will display the Opus version string (e.g., `libopus 1.3.1`) in the center of the screen.
+```shell
+flutter build web
+flutter build web --wasm
+```
 
-## Key Files
+Serve `build/web` over HTTP when testing a built application. The browser
+must be able to fetch the `.wasm` and `.js` assets; opening the files directly
+with `file://` is not a supported runtime setup.
 
-* `lib/main.dart`: The main entry point and UI.
-* `lib/src/init_web.dart`: Web-specific initialization logic for `wasm_ffi`.
-* `assets/`: Contains the compiled WASM and JS glue code.
-
-## Learn More
-
-For a comprehensive guide on building WASM modules and using `wasm_ffi`, see the main [wasm_ffi README](../README.md).
+See the root [`README.md`](../README.md) for API differences, module loading,
+memory ownership, and current limitations.

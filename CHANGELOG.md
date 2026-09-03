@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [2.4.0]
+
+* Add support for standalone WebAssembly modules under `dart2wasm`.
+* Fix BigInt (64-bit integer) marshalling and conversion when invoking Wasm exported functions.
+* Fix generic type forwarding in `DynamicLibrary.lookupFunction` to properly infer BigInt signature requirements.
+* Expand integration tests for standalone Wasm functions across `dart2js` and `dart2wasm`.
+
 ## [2.3.0]
 
 * Fixed memory bug and linting

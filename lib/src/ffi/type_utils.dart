@@ -21,13 +21,15 @@ final String pointerNativeFunctionPrefix =
         .split(_dynamicTypeString)
         .first;
 
-final String _nativeFunctionPrefix =
-    typeString<NativeFunction<dynamic>>().split(_dynamicTypeString).first;
+final String _nativeFunctionPrefix = typeString<NativeFunction<dynamic>>()
+    .split(_dynamicTypeString)
+    .first;
 bool isNativeFunctionType<T extends NativeType>() =>
     typeString<T>().startsWith(_nativeFunctionPrefix);
 
-final String _pointerPrefix =
-    typeString<Pointer<dynamic>>().split(_dynamicTypeString).first;
+final String _pointerPrefix = typeString<Pointer<dynamic>>()
+    .split(_dynamicTypeString)
+    .first;
 bool isPointerType<T extends NativeType>() =>
     typeString<T>().startsWith(_pointerPrefix);
 

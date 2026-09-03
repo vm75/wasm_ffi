@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          channel: stable
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: dart analyze lib test
+      - run: dart test
+      - run: dart test --compiler=dart2wasm test/marshaller_signature_test.dart
+      - run: dart compile wasm test/standalone_wasm_test.dart -o /tmp/standalone_wasm_test.wasm
+      - run: dart pub publish --dry-run
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - working-directory: example_flutter
+        run: flutter pub get
+      - working-directory: example_flutter
+        run: flutter analyze
+      - working-directory: example_flutter
+        run: flutter build web
+      - working-directory: example_flutter
+        run: flutter build web --wasm

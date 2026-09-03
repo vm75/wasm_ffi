@@ -23,7 +23,7 @@ extension NativeFunctionPointer<NF extends Function>
     WasmSymbol symbol = symbolByAddress(boundMemory, address);
     if (symbol is FunctionDescription && symbol.function.isA<JSFunction>()) {
       // ignore: invalid_runtime_check_with_js_interop_types
-      return marshall<NF, DF>(symbol.function as Function, boundMemory);
+      return marshall<NF, DF>(symbol.function, boundMemory);
     } else {
       throw ArgumentError(
         'No function at address $address was found (but a global symbol)!',
