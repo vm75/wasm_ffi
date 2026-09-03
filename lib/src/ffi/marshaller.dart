@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'annotations.dart';
 import 'exceptions.dart';
 import 'invoker_generated.dart';
+import 'js_function_apply.dart';
 import 'memory.dart';
 import 'type_utils.dart';
 import 'types.dart';
@@ -52,7 +53,8 @@ void initTypes([int pointerSizeBytes = 4]) {
   if (registeredPointerSizeBytes != null) {
     if (registeredPointerSizeBytes != pointerSizeBytes) {
       throw MarshallingException(
-          'Can not change pointer size after it was set to $registeredPointerSizeBytes!');
+        'Can not change pointer size after it was set to $registeredPointerSizeBytes!',
+      );
     }
     return;
   }
@@ -78,41 +80,188 @@ void initTypes([int pointerSizeBytes = 4]) {
 }
 
 // Called from the invokers
-T execute<T>(Function base, List<Object> args, Memory memory) {
+T execute<T>(Object base, List<Object> args, Memory memory) {
+  final invocation = base is _NativeFunctionInvocation ? base : null;
+  final Object target = invocation?.base ?? base;
+  final jsBigIntArgumentIndexes =
+      invocation?.jsBigIntArgumentIndexes ?? const <int>{};
+
   if (T == DartVoidType) {
-    Function.apply(base, args.map(_toJsType).toList());
+    if (target is Function) {
+      Function.apply(
+        target,
+        _toJsFunctionArguments(args, jsBigIntArgumentIndexes),
+      );
+    } else {
+      applyJsFunction(target, args, jsBigIntArgumentIndexes);
+    }
     return null as T;
   } else {
-    final Object? result = Function.apply(base, args.map(_toJsType).toList());
+    if (target is Function) {
+      final Object? result = Function.apply(
+        target,
+        _toJsFunctionArguments(args, jsBigIntArgumentIndexes),
+      );
+      if (result == null) {
+        return null as T;
+      }
+      return jsResultToDartType<T>(result, memory, _toDartType);
+    }
+
+    final Object? result = applyJsFunction(
+      target,
+      args,
+      jsBigIntArgumentIndexes,
+    );
     if (result == null) {
       return null as T;
     }
-    return _toDartType<T>(result, memory);
+    return jsResultToDartType<T>(result, memory, _toDartType);
   }
 }
 
 DF marshall<NF extends Function, DF extends Function>(
-    Function base, Memory memory) {
-  return _inferFromSignature(DF.toString()).copyWith(base, memory).run as DF;
+  Object base,
+  Memory memory,
+) {
+  final indexes = _jsBigIntArgumentIndexes(typeString<NF>());
+  final target = _NativeFunctionInvocation(base, indexes);
+  return _inferFromSignature(DF.toString()).copyWith(target, memory).run as DF;
 }
 
-Object _toJsType(Object dartObject) {
-  if (dartObject is int || dartObject is double || dartObject is bool) {
-    return dartObject;
-  } else if (dartObject is Pointer) {
-    return dartObject.address;
-  } else {
-    throw MarshallingException(
-        'Could not convert dart type ${dartObject.runtimeType} to a JavaScript type!');
+@visibleForTesting
+List<int> jsBigIntArgumentIndexesForTesting<NF extends Function>({
+  int? pointerSizeBytes,
+}) => List.unmodifiable(
+  _jsBigIntArgumentIndexes(
+    typeString<NF>(),
+    pointerSizeBytes: pointerSizeBytes,
+  ),
+);
+
+final class _NativeFunctionInvocation {
+  const _NativeFunctionInvocation(this.base, this.jsBigIntArgumentIndexes);
+
+  final Object base;
+  final Set<int> jsBigIntArgumentIndexes;
+}
+
+Set<int> _jsBigIntArgumentIndexes(
+  String nativeSignature, {
+  int? pointerSizeBytes,
+}) {
+  final indexes = <int>{};
+  final argTypes = _argumentTypesFromSignature(nativeSignature);
+  for (var i = 0; i < argTypes.length; i++) {
+    if (_usesJsBigInt(argTypes[i], pointerSizeBytes)) {
+      indexes.add(i);
+    }
   }
+  return indexes;
+}
+
+List<String> _argumentTypesFromSignature(String signature) {
+  final separator = _topLevelReturnSeparator(signature);
+  final argList =
+      (separator == -1 ? signature : signature.substring(0, separator)).trim();
+  if (!argList.startsWith('(') || !argList.endsWith(')')) {
+    return const [];
+  }
+
+  final body = argList.substring(1, argList.length - 1).trim();
+  if (body.isEmpty) {
+    return const [];
+  }
+
+  final result = <String>[];
+  var angleDepth = 0;
+  var parenDepth = 0;
+  var start = 0;
+  for (var i = 0; i < body.length; i++) {
+    final codeUnit = body.codeUnitAt(i);
+    if (codeUnit == 0x3d &&
+        i + 1 < body.length &&
+        body.codeUnitAt(i + 1) == 0x3e) {
+      i++;
+    } else if (codeUnit == 0x3c) {
+      angleDepth++;
+    } else if (codeUnit == 0x3e) {
+      angleDepth--;
+    } else if (codeUnit == 0x28) {
+      parenDepth++;
+    } else if (codeUnit == 0x29) {
+      parenDepth--;
+    } else if (codeUnit == 0x2c && angleDepth == 0 && parenDepth == 0) {
+      result.add(body.substring(start, i).trim());
+      start = i + 1;
+    }
+  }
+  result.add(body.substring(start).trim());
+  return result;
+}
+
+int _topLevelReturnSeparator(String signature) {
+  var angleDepth = 0;
+  var parenDepth = 0;
+  for (var i = 0; i < signature.length - 1; i++) {
+    final codeUnit = signature.codeUnitAt(i);
+    if (codeUnit == 0x3d && signature.codeUnitAt(i + 1) == 0x3e) {
+      if (angleDepth == 0 && parenDepth == 0) {
+        return i;
+      }
+      i++;
+    } else if (codeUnit == 0x3c) {
+      angleDepth++;
+    } else if (codeUnit == 0x3e) {
+      angleDepth--;
+    } else if (codeUnit == 0x28) {
+      parenDepth++;
+    } else if (codeUnit == 0x29) {
+      parenDepth--;
+    }
+  }
+  return -1;
+}
+
+final String _pointerTypePrefix = typeString<Pointer<dynamic>>()
+    .split(typeString<dynamic>())
+    .first;
+
+bool _usesJsBigInt(String nativeType, int? pointerSizeBytes) {
+  if (nativeType == typeString<Int64>() || nativeType == typeString<Uint64>()) {
+    return true;
+  }
+
+  if ((pointerSizeBytes ?? registeredPointerSizeBytes) != 8) {
+    return false;
+  }
+
+  return nativeType == typeString<IntPtr>() ||
+      nativeType == typeString<UintPtr>() ||
+      nativeType == typeString<Size>() ||
+      nativeType.startsWith(_pointerTypePrefix);
+}
+
+List<Object?> _toJsFunctionArguments(
+  List<Object> args,
+  Set<int> jsBigIntArgumentIndexes,
+) {
+  return [
+    for (var i = 0; i < args.length; i++)
+      toJsFunctionArgument(
+        args[i],
+        asBigInt: jsBigIntArgumentIndexes.contains(i),
+      ),
+  ];
 }
 
 InvokeHelper _inferFromSignature(String signature) {
   final String returnType = signature.split('=>').last.trim();
   if (returnType.startsWith(pointerPointerPointerPrefix)) {
     throw const MarshallingException(
-        'Nesting pointers is only supported to a deepth of 2!'
-        '\nThis means that you can write Pointer<Pointer<X>> but not Pointer<Pointer<Pointer<X>>>, ...');
+      'Nesting pointers is only supported to a deepth of 2!'
+      '\nThis means that you can write Pointer<Pointer<X>> but not Pointer<Pointer<Pointer<X>>>, ...',
+    );
   }
   final InvokeHelper? h = _knownTypes[returnType];
   if (h != null) {
@@ -120,11 +269,13 @@ InvokeHelper _inferFromSignature(String signature) {
   } else {
     if (returnType.startsWith(pointerNativeFunctionPrefix)) {
       throw const MarshallingException(
-          'Using pointers to native functions as return type is only allowed if the type of the native function is dynamic!'
-          '\nThis means that only Pointer<NativeFunction<dynamic>> is allowed!');
+        'Using pointers to native functions as return type is only allowed if the type of the native function is dynamic!'
+        '\nThis means that only Pointer<NativeFunction<dynamic>> is allowed!',
+      );
     } else {
       throw MarshallingException(
-          'Unknown type $returnType (infered from $signature), all marshallable types: ${listKnownTypes()}');
+        'Unknown type $returnType (infered from $signature), all marshallable types: ${listKnownTypes()}',
+      );
     }
   }
 }
@@ -137,7 +288,7 @@ final Map<String, InvokeHelper> _knownTypes = {
   typeString<int>(): const InvokeHelper<int>(null, null),
   typeString<double>(): const InvokeHelper<double>(null, null),
   typeString<bool>(): const InvokeHelper<bool>(null, null),
-  typeString<void>(): const InvokeHelper<void>(null, null)
+  typeString<void>(): const InvokeHelper<void>(null, null),
 };
 
 final Map<String, Function> _knownTypes2 = {
@@ -151,18 +302,20 @@ void _registerNativeMarshallerType<T extends NativeType>() {
   _knownTypes[typeString<Pointer<T>>()] = InvokeHelper<Pointer<T>>(null, null);
   _knownTypes[typeString<Pointer<Pointer<T>>>()] =
       InvokeHelper<Pointer<Pointer<T>>>(null, null);
-  _knownTypes2[typeString<Pointer<T>>()] =
-      (Object o, Memory b) => _toDartType<Pointer<T>>(o, b);
-  _knownTypes2[typeString<Pointer<Pointer<T>>>()] =
-      (Object o, Memory b) => _toDartType<Pointer<Pointer<T>>>(o, b);
+  _knownTypes2[typeString<Pointer<T>>()] = (Object o, Memory b) =>
+      _toDartType<Pointer<T>>(o, b);
+  _knownTypes2[typeString<Pointer<Pointer<T>>>()] = (Object o, Memory b) =>
+      _toDartType<Pointer<Pointer<T>>>(o, b);
 }
 
 void _registerNativeMarshallerOpaque<T extends Opaque>() {
   _knownTypes[typeString<Pointer<T>>()] = OpaqueInvokeHelper<T>(null, null);
-  _knownTypes[typeString<Pointer<Pointer<T>>>()] =
-      OpaqueInvokeHelperSquare<T>(null, null);
-  _knownTypes2[typeString<Pointer<T>>()] =
-      (Object o, Memory b) => _toDartType<Pointer<Opaque>>(o, b).cast<T>();
+  _knownTypes[typeString<Pointer<Pointer<T>>>()] = OpaqueInvokeHelperSquare<T>(
+    null,
+    null,
+  );
+  _knownTypes2[typeString<Pointer<T>>()] = (Object o, Memory b) =>
+      _toDartType<Pointer<Opaque>>(o, b).cast<T>();
   _knownTypes2[typeString<Pointer<Pointer<T>>>()] = (Object o, Memory b) =>
       _toDartType<Pointer<Pointer<Opaque>>>(o, b).cast<Pointer<T>>();
 }
@@ -416,7 +569,8 @@ T _toDartType<T>(Object o, Memory bind) {
         }
       } else {
         throw MarshallingException(
-            'Can not back-marshall to type $T (object type is ${o.runtimeType})');
+          'Can not back-marshall to type $T (object type is ${o.runtimeType})',
+        );
       }
     }
   }

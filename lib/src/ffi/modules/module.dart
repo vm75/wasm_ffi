@@ -55,7 +55,9 @@ abstract class Module {
   bool providesSymbol(String symbolName);
 
   F lookupFunction<T extends Function, F extends Function>(
-      String name, Memory memory);
+    String name,
+    Memory memory,
+  );
 
   interop.WasmTable? get indirectFunctionTable;
 }
@@ -111,12 +113,12 @@ class FunctionDescription extends WasmSymbol {
 
   /// The actual function.
   final JSFunction function;
-  const FunctionDescription(
-      {required int tableIndex,
-      required super.name,
-      required this.argumentCount,
-      required this.function})
-      : super(address: tableIndex);
+  const FunctionDescription({
+    required int tableIndex,
+    required super.name,
+    required this.argumentCount,
+    required this.function,
+  }) : super(address: tableIndex);
 
   @override
   int get hashCode => '$name$argumentCount$tableIndex'.hashCode;

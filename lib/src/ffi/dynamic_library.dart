@@ -231,5 +231,5 @@ class DynamicLibrary {
   /// This simply calls [DynamicLibrary.lookup] and [NativeFunctionPointer.asFunction]
   /// internally, so see this two methods for additional insights.
   F lookupFunction<T extends Function, F extends Function>(String name) =>
-      _module.lookupFunction(name, _memory);
+      _module.lookupFunction<T, F>(name, _memory);
 }
