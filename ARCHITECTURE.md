@@ -69,3 +69,6 @@ invalidates subsequent use of its module-backed resources.
   wasm64 runtime support.
 - `example_flutter/` contains both standalone and Emscripten assets and is
   built in both normal and `--wasm` Flutter web modes by CI.
+- `test/emscripten_module_test.dart` reads nested `asm` and `wasmExports`
+  exports using real Wasm functions plus numeric/WebAssembly globals. It runs
+  under both dart2js and dart2wasm to catch JavaScript value-conversion errors.

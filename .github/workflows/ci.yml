@@ -20,7 +20,7 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed .
       - run: dart analyze lib test
       - run: dart test
-      - run: dart test --compiler=dart2wasm test/marshaller_signature_test.dart
+      - run: dart test --compiler=dart2wasm test/marshaller_signature_test.dart test/emscripten_module_test.dart
       - run: dart compile wasm test/standalone_wasm_test.dart -o /tmp/standalone_wasm_test.wasm
       - run: dart pub publish --dry-run
       - uses: subosito/flutter-action@v2

@@ -27,7 +27,7 @@ Run from the repository root unless noted:
 - Format: `dart format --output=none --set-exit-if-changed .`
 - Analyze package: `dart analyze lib test`
 - Test: `dart test`
-- Test signature logic with dart2wasm: `dart test --compiler=dart2wasm test/marshaller_signature_test.dart`
+- Test signature and Emscripten regressions with dart2wasm: `dart test --compiler=dart2wasm test/marshaller_signature_test.dart test/emscripten_module_test.dart`
 - Compile a Wasm entry point: `dart compile wasm <entrypoint.dart> -o <output.wasm>`
 - Validate package contents: `dart pub publish --dry-run`
 - Build Flutter examples: `cd example_flutter && flutter pub get && flutter build web && flutter build web --wasm`
@@ -35,8 +35,8 @@ Run from the repository root unless noted:
 
 `dart test` is configured for Chrome because the package imports web-only
 JavaScript interop APIs. The default suite exercises standalone Wasm at runtime;
-the dart2wasm test command is currently limited to signature tests because the
-test runner's generated suite can exceed Chromium's WasmGC subtype-depth limit.
+the dart2wasm test command targets signature and Emscripten export tests because
+the test runner's generated suite can exceed Chromium's WasmGC subtype-depth limit.
 
 ## Engineering constraints
 

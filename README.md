@@ -213,7 +213,7 @@ dart pub get
 dart format --output=none --set-exit-if-changed .
 dart analyze lib test
 dart test
-dart test --compiler=dart2wasm test/marshaller_signature_test.dart
+dart test --compiler=dart2wasm test/marshaller_signature_test.dart test/emscripten_module_test.dart
 dart compile wasm test/standalone_wasm_test.dart -o /tmp/standalone_wasm_test.wasm
 dart pub publish --dry-run
 ```
@@ -222,8 +222,8 @@ The default test suite runs on Chrome because the implementation uses
 web-only JavaScript interop. CI also runs `flutter analyze`, `flutter build
 web`, and `flutter build web --wasm` in `example_flutter`. The complete test
 suite compiled as dart2wasm may exceed Chromium's WasmGC subtype-depth limit;
-the repository therefore tests dart2wasm signature logic separately and does
-not claim wasm64 runtime support.
+the repository therefore runs targeted dart2wasm signature and Emscripten
+export tests separately and does not claim wasm64 runtime support.
 
 See [`AGENTS.md`](AGENTS.md) for contributor workflow and
 [`ARCHITECTURE.md`](ARCHITECTURE.md) for component boundaries.
