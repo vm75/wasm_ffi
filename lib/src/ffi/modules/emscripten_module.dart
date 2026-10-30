@@ -4,6 +4,7 @@ library;
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
+
 import '../../js_utils/wasm_interop.dart';
 import '../annotations.dart';
 import '../extensions.dart';
@@ -163,28 +164,27 @@ class EmscriptenModule extends Module {
       _Malloc? malloc;
       _Free? free;
       final List<WasmSymbol> exports = [];
-      final List entries = WrappedJSObject.entries(asm).toDart;
+      final entries = WrappedJSObject.entries(asm).toDart;
       WasmTable? indirectFunctionTable;
       JSObject? memory;
-      // if (entries is List<Object>) {
-      for (dynamic entry in entries) {
-        if (entry is! List) {
+      for (final jsEntry in entries) {
+        if (jsEntry == null || !jsEntry.isA<JSArray>()) {
           throw StateError("Unexpected entry in entries(Module['asm'])!");
         }
-        final Object? value = entry.last;
+        final entry = (jsEntry as JSArray).toDart;
+        final name = (entry.first! as JSString).toDart;
+        final value = entry.last;
         if (value == null) {
           throw StateError('Error: Unexpected null value in for entry $entry');
         }
-        // Not sure if `value` can ever be `int` directly. I only
-        // observed it being WebAssembly.Global for globals.
-        if (value is int || (WasmGlobal.isInstance(value as WasmGlobal))) {
-          final int address = (value is int)
-              ? value
-              : ((value as WasmGlobal).value.toDartInt);
-          final Global g = Global(
-            address: address,
-            name: entry.first as String,
-          );
+        // Convert JS values explicitly: dart2wasm does not represent them as
+        // Dart List, String or int objects as dart2js sometimes does.
+        if (value.isA<JSNumber>() ||
+            WasmGlobal.isInstance(value as WasmGlobal)) {
+          final int address = value.isA<JSNumber>()
+              ? (value as JSNumber).toDartInt
+              : (value as WasmGlobal).value.toDartInt;
+          final Global g = Global(address: address, name: name);
           if (knownAddresses.containsKey(address) &&
               knownAddresses[address] is! Global) {
             throw StateError(_adu(knownAddresses[address], g));
@@ -193,7 +193,7 @@ class EmscriptenModule extends Module {
           exports.add(g);
         } else if (value.isA<JSFunction>()) {
           final FunctionDescription description = _fromWasmFunction(
-            entry.first as String,
+            name,
             value as JSFunction,
           );
           // It might happen that there are two different c functions that do nothing else than calling the same underlying c function
@@ -214,10 +214,9 @@ class EmscriptenModule extends Module {
             free = description.function as _Free;
           }
         } else if (WasmTable.isInstance(value as WasmTable) &&
-            entry.first as String == '__indirect_function_table') {
+            name == '__indirect_function_table') {
           indirectFunctionTable = value as WasmTable;
-        } else if (entry.first as String == 'memory' ||
-            entry.first as String == 'b') {
+        } else if (name == 'memory' || name == 'b') {
           // memory is often at index 'b'
           // Store the memory object for heap access
           memory = value as JSObject;
